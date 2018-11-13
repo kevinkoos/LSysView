@@ -2,43 +2,75 @@
  * Author: Kevin Koos
  * Description: class definition of an lindenmeyer system
  */
-#include <string>
-#include <vector>
+#include "lsystem.hpp"
 
 /* alphabet
- * F - draw forward 1
- * f - move forward 1
+ * == core ==
+ * there are two forward chars for edge rewriting
+ * F,D - draw forward 1
+ * f,d - move forward 1
  * [ - push current state
  * ] - pop current state
- * 
+ * + - add yaw
+ * - - sub yaw
+ * ^ - add pitch
+ * v - sub pitch
+ * > - add roll
+ * < - sub roll
  *
+ * == additional ==
+ * {...} - draw a polygon
+ * 
+ * anything else not listed is considered a placholder variable which are ignored
  */
 
+//basic constructor and destructor
+Lsystem::Lsystem(){}
+Lsystem::Lsystem(std::string axiom, std::vector<std::string> rules, std::string variables) {
+    this->axiom = axiom;
+    this->variables = variables;
+    this->rules = rules;
+    n_rules = rules.size();
+    generation = 0;
+    system.push_back(axiom);
+}
+Lsystem::~Lsystem(){}
 
-class Lsystem {
-  private:
-    std::vector<std::string> system;    //list of strings, first is axiom
-    std::vector<std::string> rules;     //defines way chars are replaced
-    std::vector<std::string> variables; //chars that can be replaced in a rule, 1-1 with rules
-    std::string axiom;                  //inital string of characters
-    int generation;                     //which generation is it
-    int n_rules;                        //number of rules total
+//gets the iteration specified by int n, will generate iterations to match
+std::string Lsystem::get(){ return system[generation]; }
 
-    //basic constructor and destructor
-    Lsystem(){}
-    ~Lsystem(){}
-  public:
-    
-    //Name: generate
-    //Decriptions: generates the next iteration of the lysystem.
-    void generate(){
-    
+std::string Lsystem::get(int n){
+    if(n > generation) {
+        //generate iteration till generation == n
     }
-    
-    //Name: strip
-    //Description: strips the production string for gen n and a pointer to the striped string on the heap
-    std::string* strip(int n) {
-        
-    }
+    return system[n];
+}
 
-};
+//advance the l-system by one iteration
+void Lsystem::next() {
+    std::size_t pos_prev = 0;
+    std::size_t pos = system[generation].find_first_of(variables);
+    system.push_back(std::string());
+    while(pos != std::string::npos) {
+        system.back().append( system[generation].substr(pos_prev,pos-1) );
+        system.back().append( rules[variables.find(system[generation][pos])] );
+        pos_prev = pos;
+        pos = system[generation].find_first_of(variables, pos+1);
+    }
+    system.back().append( system[generation].substr(pos_prev) );    
+    generation++;
+}
+
+    
+
+
+
+
+
+
+
+
+
+
+
+

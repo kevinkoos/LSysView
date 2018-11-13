@@ -29,5 +29,26 @@ int main(int argc, char** argv) {
     turtle.yaw(90);
     turtle.forward();
     print(turtle.get_pos());
+    
+    
+    std::string axiom = "A";
+    std::vector<std::string> rules{"AB","B"};
+    std::string vars = "AB";
+    Lsystem Lsys = Lsystem(axiom, rules, vars);
+    std::cout << "lsystem" << std::endl;
+    
+    std::cout << Lsys.get() << std::endl;
+    
+    Lsys.next();
+    std::cout << Lsys.get() << std::endl;
+    
+    Lsys.next();
+    std::cout << Lsys.get() << std::endl;
+    
+    Lsys.next();
+    std::cout << Lsys.get() << std::endl;
+    
+    
+    
     return 0;
 }
