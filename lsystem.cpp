@@ -48,17 +48,18 @@ std::string Lsystem::get(int n){
 
 //advance the l-system by one iteration
 void Lsystem::next() {
-    std::size_t pos_prev = 0;
-    std::size_t pos = system[generation].find_first_of(variables);
-    system.push_back(std::string());
-    while(pos != std::string::npos) {
-        system.back().append( system[generation].substr(pos_prev,pos-1) );
-        system.back().append( rules[variables.find(system[generation][pos])] );
-        pos_prev = pos;
-        pos = system[generation].find_first_of(variables, pos+1);
-    }
-    system.back().append( system[generation].substr(pos_prev) );    
+    char c;
+    std::size_t pos;
+    system.push_back(system.back());
     generation++;
+    //loop backwards replacing as we go
+    for(int i = system.back().length()-1; i >= 0; i--) {
+        c = system.back()[i];
+        pos = variables.find(c);
+        if(pos != std::string::npos) {
+            system.back().replace(i, 1, rules[pos]);
+        }
+    }
 }
 
     

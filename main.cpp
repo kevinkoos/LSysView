@@ -31,9 +31,9 @@ int main(int argc, char** argv) {
     print(turtle.get_pos());
     
     
-    std::string axiom = "A";
-    std::vector<std::string> rules{"AB","B"};
-    std::string vars = "AB";
+    std::string axiom = "F";
+    std::vector<std::string> rules{"F-H","F+H"};
+    std::string vars = "FH";
     Lsystem Lsys = Lsystem(axiom, rules, vars);
     std::cout << "lsystem" << std::endl;
     
@@ -48,7 +48,9 @@ int main(int argc, char** argv) {
     Lsys.next();
     std::cout << Lsys.get() << std::endl;
     
-    
+    Lsys.next();
+    std::cout << Lsys.get() << std::endl;
+
     
     return 0;
 }

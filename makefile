@@ -4,7 +4,7 @@ MAIN = main.cpp
 $(EXE):		$(MAIN) lsystem.o turtle.o main.hpp
 		g++ -o $(EXE) $(MAIN) turtle.o lsystem.o
 		
-debug:		$(MAIN) lystem.hpp lsystem.cpp turtle.hpp turtle.cpp main.hpp
+debug:		$(MAIN) lsystem.hpp lsystem.cpp turtle.hpp turtle.cpp main.hpp
 		g++ -Og -ggdb -o $(EXE) $(MAIN) lsystem.cpp turtle.cpp
 		
 turtle:		turtle.cpp turtle.hpp
