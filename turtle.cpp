@@ -28,7 +28,7 @@ Turtle::Turtle(const Turtle &turt) {
 }
 
 //sends the turtle forward in its heading
-void Turtle::forward(){ position += glm::normalize(coord_sys[0]); }
+void Turtle::forward(){ position += coord_sys[0]; }
     
 //get the position of the turtle
 glm::vec3 Turtle::get_pos() { return position; }

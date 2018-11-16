@@ -36,12 +36,17 @@ Lsystem::Lsystem(std::string axiom, std::vector<std::string> rules, std::string 
 }
 Lsystem::~Lsystem(){}
 
-//gets the iteration specified by int n, will generate iterations to match
+//shortcut functions
 std::string Lsystem::get(){ return system[generation]; }
+std::string Lsystem::get_next(){ this->next(); return this->get(); }
 
+
+//gets the iteration specified by int n, will generate iterations to match
 std::string Lsystem::get(int n){
     if(n > generation) {
-        //generate iteration till generation == n
+        for(int i = generation; i < n; i++) {
+            this->next();
+        }
     }
     return system[n];
 }
@@ -60,6 +65,11 @@ void Lsystem::next() {
             system.back().replace(i, 1, rules[pos]);
         }
     }
+}
+
+//get the latest generation number
+int Lsystem::get_gen() {
+    return generation;
 }
 
     

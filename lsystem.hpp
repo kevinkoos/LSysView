@@ -20,6 +20,8 @@ public:
     std::string get();
     std::string get(int n);
     void next();
+    int get_gen();
+    std::string get_next();
 };
 
 #endif

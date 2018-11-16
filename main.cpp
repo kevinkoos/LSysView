@@ -51,6 +51,13 @@ int main(int argc, char** argv) {
     Lsys.next();
     std::cout << Lsys.get() << std::endl;
 
+
+    std::cout << "Generation: " << Lsys.get_gen() << std::endl;
+    std::cout << Lsys.get() << std::endl;
+    std::cout << Lsys.get(5) << std::endl;
+    std::cout << Lsys.get_next() << std::endl;
+    std::cout << "Generation: " << Lsys.get_gen() << std::endl;
+
     
     return 0;
 }
