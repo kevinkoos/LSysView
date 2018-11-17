@@ -22,9 +22,9 @@ Turtle::Turtle() {
 Turtle::~Turtle(){}
     
 //copy constructor
-Turtle::Turtle(const Turtle &turt) {
-    position = turt.position;
-    coord_sys = turt.coord_sys;
+Turtle::Turtle(Turtle *turt) {
+    position = turt->position;
+    coord_sys = turt->coord_sys;
 }
 
 //sends the turtle forward in its heading

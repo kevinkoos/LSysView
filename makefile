@@ -1,10 +1,10 @@
 EXE = main 
 MAIN = main.cpp
 
-$(EXE):		$(MAIN) lsystem.o turtle.o main.hpp
+$(EXE):		$(MAIN) lsystem.o turtle.o
 		g++ -o $(EXE) $(MAIN) turtle.o lsystem.o
 		
-debug:		$(MAIN) lsystem.hpp lsystem.cpp turtle.hpp turtle.cpp main.hpp
+debug:		$(MAIN) lsystem.hpp lsystem.cpp turtle.hpp turtle.cpp
 		g++ -Og -ggdb -o $(EXE) $(MAIN) lsystem.cpp turtle.cpp
 		
 turtle:		turtle.cpp turtle.hpp
@@ -17,5 +17,5 @@ lsystem:	lsystem.hpp lsystem.cpp
 clean:
 		rm *.o $(EXE)
 
-build:		$(MAIN) lsystem.o turtle.o main.hpp
+build:		$(MAIN) lsystem.o turtle.o
 		g++ -o $(EXE) $(MAIN) turtle.o lsystem.o

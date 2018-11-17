@@ -17,7 +17,7 @@ class Turtle {
     
     Turtle();
     ~Turtle();
-    Turtle(const Turtle &turt);
+    Turtle(Turtle *turt);
     void forward();
     glm::vec3 get_pos();
     void pitch(float angle);

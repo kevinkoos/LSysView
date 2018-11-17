@@ -6,9 +6,8 @@
 
 /* alphabet
  * == core ==
- * there are two forward chars for edge rewriting
- * F,D - draw forward 1
- * f,d - move forward 1
+ * there are two forward chars for allowing edge rewriting systems
+ * F,D - forward 1
  * [ - push current state
  * ] - pop current state
  * + - add yaw
@@ -21,7 +20,7 @@
  * == additional ==
  * {...} - draw a polygon
  * 
- * anything else not listed is considered a placholder variable which are ignored
+ * anything else not listed is considered a placholder variable which are ignored by the turtle
  */
 
 //basic constructor and destructor
