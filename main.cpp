@@ -5,7 +5,9 @@
 #include <vector>
 #include <list>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <cstdio>
 #include "turtle.hpp"
 #include "lsystem.hpp"
 
@@ -25,97 +27,103 @@ enum CHARS {
 };
 
 void print(glm::vec3 vec) {
-    std::cout << "x: " << round(vec.x) << "  " << "y: " << round(vec.y) << "  " << "z: ";
-    std::cout << round(vec.z) << std::endl;
-}
-
-void new_turtle(std::vector<std::string> sys, std::vector<Turtle> turts) {
-    //use a reg expression to take current turtle string, grab [...] characters, make new turtle, with
-    //the right character string and remove old from original turtle.
-    //there is a copy constructor for doing this easily
+    //std::cout << "x: " << vec.x << "  " << "y: " << vec.y << "  " << "z: "  << vec.z << std::endl;
+    printf("x: %5.2f  y: %5.2f  z: %5.2f\n", vec.x, vec.y, vec.z);
     
 }
-
 
 int main(int argc, char** argv) {
     
-    std::string axiom = "A";
-    std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
-    std::string vars = "AB";
+//     float angle = 90;
+//     std::string axiom = "A";
+//     std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
+//     std::string vars = "AB";
+    float angle = 45;
+    std::string axiom = "D";
+    std::vector<std::string> rules{"F[+D]-D","FF"};
+    std::string vars = "DF";
+    
     Lsystem Lsys = Lsystem(axiom, rules, vars);
-    std::cout << "lsystem" << std::endl;
-    
-    std::cout << Lsys.get() << std::endl;
-    
-    Lsys.next();
-    std::cout << Lsys.get() << std::endl;
-    
-    Lsys.next();
-    std::cout << Lsys.get() << std::endl;
+        
+    Lsys.next();    //1st iter
+    Lsys.next();    //2nd
+    Lsys.next();    //3rd
     
     /* ========== testing map and char reading loop ============= */
     
-    float angle = 90;
+    std::cout << "Starting string: " << axiom << std::endl;
+    std::cout << "Variables: " << vars << std::endl;
+    std::cout << "Rules: "; 
+    for(int i=0;i<rules.size();i++){ std::cout << std::setw(4) << rules[i]; }
+    std::cout << std::endl;
+    
+    
     bool loop = false;
-    std::vector<std::string> systems;
-    std::vector<Turtle> turt_sys;
-    std::vector<glm::vec3> current_turtles;
-    std::vector<glm::vec3> vertices;
+    std::list<std::string> systems;
+    std::list<Turtle>      turt_sys;
+    std::vector<glm::vec3>   current_turtles;
+    std::vector<glm::vec3>   vertices;
     char c;
-    int i = 0;
-    int j = 0;
-    int op_br = 0;
+    int op_br;
     
     systems.push_back(Lsys.get());
-    turt_sys.push_back(new Turtle());
+    turt_sys.push_back(Turtle());
+    vertices.push_back(glm::vec3(0., 0., 0.));
 
+    std::list<Turtle>::iterator turtle;
+    std::list<std::string>::iterator t_string;
+    
     do {
+        turtle = turt_sys.begin();                      //turtle back to begining
+        t_string = systems.begin(); 
         current_turtles.clear();
-        while(i < turt_sys.size()) {
+        while (turtle != turt_sys.end()) {
             
-            c = systems[i][0];
-            systems[i].erase(0,1);
+            c = (*t_string)[0];
+            (*t_string).erase(0,1);
             
             switch(c) {
                 case DRAW:
                 case FORWARD:
-                    turt_sys[i].forward();
-                    vertices.push_back(turt_sys[i].get_pos());
-                    current_turtles.push_back(turt_sys[i].get_pos());
-                    i++;                                //next turtle
+                    (*turtle).forward();
+                    vertices.push_back((*turtle).get_pos());
+                    current_turtles.push_back((*turtle).get_pos());
+                    turtle++;                                //next turtle
+                    t_string++;                              //next turtle string
                     break;
             
                 case YAW_UP:
-                    turt_sys[i].yaw(angle);
+                    (*turtle).yaw(angle);
                     break;
                     
                 case YAW_DOWN:
-                    turt_sys[i].yaw(-angle);
+                    (*turtle).yaw(-angle);
                     break;
                     
                 case PITCH_UP:
-                    turt_sys[i].pitch(angle);
+                    (*turtle).pitch(angle);
                     break;
                     
                 case PITCH_DOWN:
-                    turt_sys[i].pitch(-angle);
+                    (*turtle).pitch(-angle);
                     break;
                     
                 case ROLL_UP:
-                    turt_sys[i].roll(angle);
+                    (*turtle).roll(angle);
                     break;
                     
                 case ROLL_DOWN:
-                    turt_sys[i].roll(-angle);
+                    (*turtle).roll(-angle);
                     break;
                     
                 case BRANCH:                            //add a branching path to tree, new turtle
+                    //put all into a function later
                     op_br = 1;
                     systems.push_back(std::string());
-                    turt_sys.push_back(new Turtle(turt_sys[i]));
+                    turt_sys.push_back(Turtle(*turtle));
                     while(op_br != 0) {                 //count '[' / ']' until 0 
-                        c = systems[i][0];
-                        systems[i].erase(0,1);          //chars from original string removed
+                        c = (*t_string)[0];
+                        (*t_string).erase(0,1);         //chars from original string removed
                         if (c == '[') {
                             op_br++;
                         } else if (c == ']') {
@@ -127,28 +135,24 @@ int main(int argc, char** argv) {
                     break;
                     
                 case POLY:                              //draw a polygon from closing '}' turtle positions
+                    //make a functions but when integrating into opengl sample app
                     
                     break;
                     
                 case END:                               //turtle is at end of string
-                    
+                    turtle = turt_sys.erase(turtle);    //remove turtle
+                    t_string = systems.erase(t_string); //remove its string
                     break;
                     
                 default:                                //all other chars are ignored by turtle
-                    
                     break;
-                
-                
             }
-            
-            
         }
-        
-    } while(loop);
+    } while(loop && !turt_sys.empty());                 //if we want to loop, go until we're done
     
-    for(int t = 0; t < vertices.size(); t++) {
+    //print out the list of vertices
+    for(int i = 0; i < vertices.size(); i++) {
         print(vertices[i]);
-        
     }
     
     
