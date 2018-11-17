@@ -57,18 +57,21 @@ int main(int argc, char** argv) {
     for(int i=0;i<rules.size();i++){ std::cout << std::setw(4) << rules[i]; }
     std::cout << std::endl;
     
+
     
-    bool loop = false;
+    bool loop = true;
     std::list<std::string> systems;
     std::list<Turtle>      turt_sys;
     std::vector<glm::vec3>   current_turtles;
     std::vector<glm::vec3>   vertices;
+    std::vector<glm::vec3>   prev_vertices;
     char c;
     int op_br;
     
     systems.push_back(Lsys.get());
     turt_sys.push_back(Turtle());
     vertices.push_back(glm::vec3(0., 0., 0.));
+    prev_vertices.push_back(glm::vec3(0., 0., 0.));
 
     std::list<Turtle>::iterator turtle;
     std::list<std::string>::iterator t_string;
@@ -85,6 +88,7 @@ int main(int argc, char** argv) {
             switch(c) {
                 case DRAW:
                 case FORWARD:
+                    prev_vertices.push_back((*turtle).get_pos());
                     (*turtle).forward();
                     vertices.push_back((*turtle).get_pos());
                     current_turtles.push_back((*turtle).get_pos());
@@ -153,6 +157,8 @@ int main(int argc, char** argv) {
     //print out the list of vertices
     for(int i = 0; i < vertices.size(); i++) {
         print(vertices[i]);
+        //printf("\t");
+        //print(prev_vertices[i]);
     }
     
     
