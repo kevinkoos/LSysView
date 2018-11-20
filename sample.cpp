@@ -87,7 +87,7 @@ std::list<Turtle>        turt_sys;
 std::vector<glm::vec3>   current_turtles;
 std::vector<glm::vec3>   vertices;
 std::vector<glm::vec3>   prev_vertices;
-bool loop;
+bool bDraw;
 
 //tmp stuff
 float angle = 90;
@@ -157,7 +157,9 @@ void Animate( ) {
     ms %= MS_PER_CYCLE;
     Time = ms/(float)MS_PER_CYCLE;
     
-    
+    if(bDraw && ((ms % 4) == 0)) {
+        NextIteration(false);
+    }
     
     
 	glutSetWindow( MainWindow );
@@ -165,7 +167,7 @@ void Animate( ) {
 }
 
 // produces the next iteration in lsystem
-void NextIteration(void* dt) {
+void NextIteration(bool loop) {
     char c;
     int op_br;
     std::list<Turtle>::iterator turtle;
@@ -325,6 +327,12 @@ void Display( ) {
     }
     glEnd();
     
+    glBegin( GL_POINTS );
+    for(int j = 0; j < current_turtles.size(); j++) {
+        glPointSize(5.0f);
+        glVertex3f(current_turtles[j].x, current_turtles[j].y, current_turtles[j].z);
+    }
+    glEnd();
     
     glPopMatrix();
     

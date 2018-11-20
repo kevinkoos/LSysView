@@ -22,12 +22,22 @@ void Reset(void* dt) {
     Frozen = false;
     ms = 0;
     Time = 0;
-    loop = true;
     //reset object rotation
     QuatReset(g_Rotation);
     QuatReset(g_Rotation_Scene);
 }
 
+void CompleteDrawHandle(void* dt) {
+    NextIteration(true);
+}
+
+void NextIterHandle(void* dt) {
+    NextIteration(false); //draw complete scene
+}
+
+void AnimateDraw(void* dt) {
+    bDraw = true;
+}
 
 void InitGUI(void) {
     
@@ -60,16 +70,17 @@ void InitGUI(void) {
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation, 
                " label='Object rotation' opened=true help='Change the object orientation.' ");
     
-    TwAddSeparator(bar, "Settings", NULL);
+    TwAddSeparator(bar, NULL, NULL);
     TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a ");
     TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &WhichProjection, " key=p ");
     TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &Frozen, " key=f ");
     
     TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " colormode=hls ");
     
-    TwAddSeparator(bar, "L-System", NULL);
-    TwAddVarRW(bar, "Complete", TW_TYPE_BOOLCPP, &loop, NULL);
-    TwAddButton(bar, "Next Iteration", &NextIteration, NULL, NULL);
+    TwAddSeparator(bar, NULL, NULL);
+    TwAddButton(bar, "Complete Draw", &CompleteDrawHandle, NULL, NULL);
+    TwAddButton(bar, "Next Iteration", &NextIterHandle, NULL, NULL);
+    TwAddButton(bar, "Animated Draw", &AnimateDraw, NULL, NULL);
     
     
     TwAddSeparator(bar, NULL, NULL);

@@ -35,7 +35,10 @@
 
 // function prototypes:
 void	Animate( );
-void    NextIteration(void*);
+void    NextIteration(bool);
+void    NextIterHandle(void*);
+void    CompleteDrawHandle(void*);
+void    AnimateDraw(void*);
 void	Display( );
 float	ElapsedSeconds( );
 void	InitGraphics( );
@@ -119,12 +122,12 @@ extern float g_Scene_Angle_x;
 extern float g_Scene_Angle_y;
 extern float color[];
 
-extern bool loop;
 extern Lsystem* Lsys;
 extern std::list<std::string>   systems;
 extern std::list<Turtle>        turt_sys;
 extern std::vector<glm::vec3>   current_turtles;
 extern std::vector<glm::vec3>   vertices;
 extern std::vector<glm::vec3>   prev_vertices;
+extern bool bDraw;
 
 #endif
