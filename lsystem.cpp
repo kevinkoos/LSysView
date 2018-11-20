@@ -33,7 +33,6 @@ Lsystem::Lsystem(std::string axiom, std::vector<std::string> rules, std::string 
     generation = 0;
     system.push_back(axiom);
 }
-Lsystem::~Lsystem(){}
 
 //shortcut functions
 std::string Lsystem::get(){ return system[generation]; }

@@ -10,7 +10,7 @@ void Turtle::update_sys(int ax, float angle){
         if(ax == 1) { axis = glm::vec3(0.f,1.f,0.f); }        //pitch
         else if(ax == 2) { axis = glm::vec3(0.f,0.f,1.f); }   //yaw
         else if(ax == 3){ axis = glm::vec3(1.f,0.f,0.f); }    //roll
-        coord_sys *= glm::mat3(glm::rotate(glm::mat4(), glm::radians(angle), axis));
+        coord_sys *= glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis));
 }
 
 //basic constructor
@@ -19,7 +19,6 @@ Turtle::Turtle() {
         coord_sys = glm::mat3(1.f);    //default coord sys is i,j,k
 }
     
-Turtle::~Turtle(){}
     
 //copy constructor
 Turtle::Turtle(Turtle *turt) {
