@@ -1,4 +1,4 @@
-/* Name: functions.cpp
+/* Name: functions.cpps
  * Desciprion: utility functions for sample.cpp separated for convience and readability
  * Author: Kevin Koos
  */

@@ -7,6 +7,8 @@
 //safelty close everything
 void Terminate(void* dt) {
     glutSetWindow( MainWindow );
+    glDeleteLists(AxesList, 1);
+    glDeleteLists(SphereList, 1);
     glFinish( );
     glutDestroyWindow( MainWindow );
     TwTerminate();
@@ -19,24 +21,52 @@ void Reset(void* dt) {
 	AxesOn = 1;
 	Scale  = 1.0;
 	WhichProjection = PERSP;
-    Frozen = false;
+    bAnimate = false;
     ms = 0;
     Time = 0;
+    iDrawSpeed = 4;
+    MS_PER_CYCLE = 50;
+    Generation = Lsys->get_gen();
+    iSkip = 1;
+    
     //reset object rotation
     QuatReset(g_Rotation);
     QuatReset(g_Rotation_Scene);
 }
 
-void CompleteDrawHandle(void* dt) {
+void CompleteDrawHandle(void* data) {
     NextIteration(true);
 }
 
-void NextIterHandle(void* dt) {
+void NextIterHandle(void* data) {
     NextIteration(false); //draw complete scene
 }
 
-void AnimateDraw(void* dt) {
+void AnimateDraw(void* data) {
     bDraw = true;
+}
+
+void ResetDrawing(void* data) {
+    //clear vectors
+    vertices.clear();
+    prev_vertices.clear();
+    current_turtles.clear();
+    turt_sys.clear();
+    systems.clear();
+    
+    //initalize
+    vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    prev_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    turt_sys.push_back(Turtle());
+    systems.push_back(Lsys->get());
+    
+    Generation = Lsys->get_gen();
+    bDraw = false;
+}
+
+void NextLsystem(void* data) {
+    Lsys->next();
+    Generation = Lsys->get_gen();
 }
 
 void InitGUI(void) {
@@ -62,7 +92,7 @@ void InitGUI(void) {
     // create tweak bar
     bar = TwNewBar("Controls");
     TwDefine(" GLOBAL help='Basic tweak bar.' ");
-    TwDefine(" Controls size='200 300' color='160 160 160' ");
+    TwDefine(" Controls size='250 350' color='160 160 160' ");
     
     TwAddVarRW(bar, "Scale", TW_TYPE_FLOAT, &Scale, 
                " min=0.01 max=2.5 step=0.01 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
@@ -73,7 +103,9 @@ void InitGUI(void) {
     TwAddSeparator(bar, NULL, NULL);
     TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a ");
     TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &WhichProjection, " key=p ");
-    TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &Frozen, " key=f ");
+    TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &bAnimate, " key=f ");
+    TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &MS_PER_CYCLE, " min=1 max=100 step=1 ");
+    TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, " min=1 max=10 step=1 ");
     
     TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " colormode=hls ");
     
@@ -81,6 +113,9 @@ void InitGUI(void) {
     TwAddButton(bar, "Complete Draw", &CompleteDrawHandle, NULL, NULL);
     TwAddButton(bar, "Next Iteration", &NextIterHandle, NULL, NULL);
     TwAddButton(bar, "Animated Draw", &AnimateDraw, NULL, NULL);
+    TwAddButton(bar, "Reset Lsys", &ResetDrawing, NULL, NULL);
+    TwAddButton(bar, "Next Lsys", &NextLsystem, NULL, NULL);
+    TwAddVarRO(bar, "Generation:", TW_TYPE_INT32, &Generation, NULL);
     
     
     TwAddSeparator(bar, NULL, NULL);

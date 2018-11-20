@@ -37,8 +37,8 @@ const int GLUIFALSE = { false };
 #define ESCAPE		0x1b
 
 // initial window size:
-const int INIT_WINDOW_HEIGHT = { 800 };
-const int INIT_WINDOW_WIDTH = { 600 };
+const int INIT_WINDOW_HEIGHT = { 1000 };
+const int INIT_WINDOW_WIDTH = { 1000 };
 
 // minimum allowable scale factor:
 const float MINSCALE = { 0.05f };
@@ -63,13 +63,14 @@ int		ActiveButton;			// current button that is down
 bool	AxesOn;					// != 0 means to draw the axes
 int		MainWindow;				// window id for main graphics window
 float	Scale;					// scaling factor
-bool    Frozen;
+bool    bAnimate;
 bool	WhichProjection;
 int		Xmouse, Ymouse;			// mouse values
 float   Time;
 int     ms;
 
 GLuint AxesList;
+GLuint SphereList;
 
 // rotations and atb stuff
 float g_Rotation[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -79,6 +80,7 @@ float g_Scene_Angle_y;
 float mat[4*4]; // rotation matrix
 float quat[4];
 float color[] { 1.0f, 1.0f, 1.0f };
+int   MS_PER_CYCLE;
 
 // lsystem and turtles
 Lsystem* Lsys;
@@ -88,6 +90,9 @@ std::vector<glm::vec3>   current_turtles;
 std::vector<glm::vec3>   vertices;
 std::vector<glm::vec3>   prev_vertices;
 bool bDraw;
+int  iDrawSpeed;
+int  Generation;
+int  iSkip;
 
 //tmp stuff
 float angle = 90;
@@ -146,20 +151,27 @@ void Animate( ) {
 	// put animation stuff in here -- change some global variables
 	// for Display( ) to find:
 	// force a call to Display( ) next time it is convenient:
-    //ms = glutGet( GLUT_ELAPSED_TIME );
-    //ms %= MS_PER_CYCLE;
-    //Time = (float)ms / (float)MS_PER_CYCLE;		// [0.,1.)
+//     ms = glutGet( GLUT_ELAPSED_TIME );
+//     ms %= MS_PER_CYCLE;
+//     Time = (float)ms / (float)MS_PER_CYCLE;		// [0.,1.)
     
     //make ms a counter
-    //not exact in cycle timing but allows smooth starts in animation
-    //also useful for iterating turtle cycles
-    if(Frozen) { ms += 1; } 
+    //exact timing per machine is unclear but this is easier to work with
+    if(bAnimate && bDraw) { ms += 1; }
     ms %= MS_PER_CYCLE;
     Time = ms/(float)MS_PER_CYCLE;
     
-    if(bDraw && ((ms % 4) == 0)) {
-        NextIteration(false);
+    
+    if(bDraw && ms == 0) {
+        for(int i = 0; i < iSkip; i++) {
+            NextIteration(false);
+        }
     }
+    
+    if(turt_sys.empty()) {
+        bDraw = false;
+    }
+    
     
     
 	glutSetWindow( MainWindow );
@@ -311,11 +323,6 @@ void Display( ) {
     // Rotate and draw shape
     glPushMatrix();
 
-    SetQuaternionFromAxisAngle(y_axis, 360*Time, quat);
-    ConvertQuaternionToMatrix(quat, mat);
-    glMultMatrixf(mat);
-
-
     ConvertQuaternionToMatrix(g_Rotation, mat);
     glMultMatrixf(mat);
     
@@ -327,12 +334,12 @@ void Display( ) {
     }
     glEnd();
     
-    glBegin( GL_POINTS );
     for(int j = 0; j < current_turtles.size(); j++) {
-        glPointSize(5.0f);
-        glVertex3f(current_turtles[j].x, current_turtles[j].y, current_turtles[j].z);
+        glPushMatrix();
+        glTranslatef(current_turtles[j].x, current_turtles[j].y, current_turtles[j].z);
+        glCallList(SphereList);
+        glPopMatrix();
     }
-    glEnd();
     
     glPopMatrix();
     
@@ -362,6 +369,13 @@ void InitLists( ) {
 			Axes( AXES_LENGTH );
 		glLineWidth( 1. );
 	glEndList( );
+    
+    
+    // small sphere
+    SphereList = glGenLists(1);
+    glNewList( SphereList, GL_COMPILE );
+        glutSolidSphere(0.1,25,25);
+    glEndList();
 }
 
 

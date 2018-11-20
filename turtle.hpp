@@ -30,6 +30,7 @@ class Turtle {
     public:
     
     Turtle();
+    ~Turtle();
     Turtle(Turtle *turt);
     void update_sys(int ax, float angle);
     void forward();

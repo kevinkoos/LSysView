@@ -19,6 +19,7 @@ Turtle::Turtle() {
         coord_sys = glm::mat3(1.f);    //default coord sys is i,j,k
 }
     
+Turtle::~Turtle() { }
     
 //copy constructor
 Turtle::Turtle(Turtle *turt) {

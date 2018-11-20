@@ -4,6 +4,7 @@
 // base libraries 
 #include <stdlib.h>
 #include <ctype.h>
+#include <iostream>
 
 // math
 #define _USE_MATH_DEFINES
@@ -13,13 +14,12 @@
 #ifdef WIN32
 #include <windows.h>
 #pragma warning(disable:4996)
-#include "glew.h"
+#include <GL/glew.h>
 #endif
-
 // opengl, glu, and glut includes
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include <glm/trigonometric.hpp>
 
@@ -31,7 +31,6 @@
 #include <list>
 
 //#define GLUT_DISABLE_ATEXIT_HACK
-#define MS_PER_CYCLE 1000
 
 // function prototypes:
 void	Animate( );
@@ -39,6 +38,7 @@ void    NextIteration(bool);
 void    NextIterHandle(void*);
 void    CompleteDrawHandle(void*);
 void    AnimateDraw(void*);
+void    FreezeHandle(void*);
 void	Display( );
 float	ElapsedSeconds( );
 void	InitGraphics( );
@@ -109,11 +109,14 @@ extern int		MainWindow;				// window id for main graphics window
 extern float	Scale;					// scaling factor
 extern bool		WhichProjection;		// ORTHO or PERSP
 extern int		Xmouse, Ymouse;			// mouse values
-extern bool     Frozen;
+extern bool     bAnimate;
 extern float    Time;
 extern int      ms;
 
 extern TwBar* bar;
+
+extern GLuint AxesList;
+extern GLuint SphereList;
 
 //rotations
 extern float g_Rotation[];
@@ -121,6 +124,7 @@ extern float g_Rotation_Scene[];
 extern float g_Scene_Angle_x;
 extern float g_Scene_Angle_y;
 extern float color[];
+extern int MS_PER_CYCLE;
 
 extern Lsystem* Lsys;
 extern std::list<std::string>   systems;
@@ -129,5 +133,8 @@ extern std::vector<glm::vec3>   current_turtles;
 extern std::vector<glm::vec3>   vertices;
 extern std::vector<glm::vec3>   prev_vertices;
 extern bool bDraw;
+extern int  iDrawSpeed;
+extern int  Generation;
+extern int  iSkip;
 
 #endif

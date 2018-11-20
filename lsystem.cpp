@@ -25,6 +25,7 @@
 
 //basic constructor and destructor
 Lsystem::Lsystem(){}
+Lsystem::~Lsystem(){}
 Lsystem::Lsystem(std::string axiom, std::vector<std::string> rules, std::string variables) {
     this->axiom = axiom;
     this->variables = variables;

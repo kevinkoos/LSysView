@@ -15,6 +15,7 @@ private:
     
 public:
     Lsystem();
+    ~Lsystem();
     Lsystem(std::string axiom, std::vector<std::string> rules, std::string variables);
     std::string get();
     std::string get(int n);
