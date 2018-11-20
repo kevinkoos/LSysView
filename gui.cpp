@@ -14,37 +14,6 @@ void Terminate(void* dt) {
     TwTerminate();
 }
 
-// reset the transformations and the colors:
-// this only sets the global variables --
-// the glut main loop is responsible for redrawing the scene
-void Reset(void* dt) {
-	AxesOn = 1;
-	Scale  = 1.0;
-	WhichProjection = PERSP;
-    bAnimate = false;
-    ms = 0;
-    Time = 0;
-    iDrawSpeed = 4;
-    MS_PER_CYCLE = 50;
-    Generation = Lsys->get_gen();
-    iSkip = 1;
-    
-    //reset object rotation
-    QuatReset(g_Rotation);
-    QuatReset(g_Rotation_Scene);
-}
-
-void CompleteDrawHandle(void* data) {
-    NextIteration(true);
-}
-
-void NextIterHandle(void* data) {
-    NextIteration(false); //draw complete scene
-}
-
-void AnimateDraw(void* data) {
-    bDraw = true;
-}
 
 void ResetDrawing(void* data) {
     //clear vectors
@@ -62,6 +31,51 @@ void ResetDrawing(void* data) {
     
     Generation = Lsys->get_gen();
     bDraw = false;
+}
+
+// reset the transformations and the colors:
+// this only sets the global variables --
+// the glut main loop is responsible for redrawing the scene
+void Reset(void* dt) {
+	AxesOn = false;
+	Scale  = 1.0;
+    pScale = 1.0;
+	WhichProjection = PERSP;
+    bAnimate = true;
+    bCamera = false;
+    bTranslate = true;
+    ms = 0;
+    Time = 0;
+    MS_PER_CYCLE = 10;
+    Generation = Lsys->get_gen();
+    iSkip = 1;
+    
+    //reset object rotation
+    QuatReset(g_Rotation);
+    QuatReset(g_Rotation_Scene);
+    
+    //reset lsys
+    ResetDrawing(NULL);
+}
+
+void CompleteDrawHandle(void* data) {
+    if(!vertices.empty()){
+        ResetDrawing(NULL);
+    }
+    while(!turt_sys.empty()) {
+        NextIteration();
+    }
+}
+
+void NextIterHandle(void* data) {
+    NextIteration(); 
+}
+
+void AnimateDraw(void* data) {
+    if(!vertices.empty()){
+        ResetDrawing(NULL);
+    }
+    bDraw = true;
 }
 
 void NextLsystem(void* data) {
@@ -92,10 +106,12 @@ void InitGUI(void) {
     // create tweak bar
     bar = TwNewBar("Controls");
     TwDefine(" GLOBAL help='Basic tweak bar.' ");
-    TwDefine(" Controls size='250 350' color='160 160 160' ");
+    TwDefine(" Controls size='250 450' color='110 110 110' ");
     
     TwAddVarRW(bar, "Scale", TW_TYPE_FLOAT, &Scale, 
                " min=0.01 max=2.5 step=0.01 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
+    TwAddVarRW(bar, "Turtle Scale", TW_TYPE_FLOAT, &pScale, 
+               " min=0.01 max=5 step=0.01 help='Scale the size of the turtles.' ");
 
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation, 
                " label='Object rotation' opened=true help='Change the object orientation.' ");
@@ -103,11 +119,14 @@ void InitGUI(void) {
     TwAddSeparator(bar, NULL, NULL);
     TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a ");
     TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &WhichProjection, " key=p ");
+    TwAddVarRW(bar, "Camera Perspective", TW_TYPE_BOOLCPP, &bCamera, " key=c ");
     TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &bAnimate, " key=f ");
     TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &MS_PER_CYCLE, " min=1 max=100 step=1 ");
     TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, " min=1 max=10 step=1 ");
+    TwAddVarRW(bar, "Auto-Center", TW_TYPE_BOOLCPP, &bTranslate, " key=t ");
     
     TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " colormode=hls ");
+    TwAddVarRW(bar, "Turtle Color", TW_TYPE_COLOR3F, &colorp, " colormode=hls ");
     
     TwAddSeparator(bar, NULL, NULL);
     TwAddButton(bar, "Complete Draw", &CompleteDrawHandle, NULL, NULL);

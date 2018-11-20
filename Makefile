@@ -1,5 +1,5 @@
-EXE = sample 
-MAIN = sample.cpp 
+EXE = lsysview 
+MAIN = lsysview.cpp 
 
 $(EXE):		$(MAIN) header.h functions quat gui turtle lsystem
 		g++ -o $(EXE) $(MAIN) functions.o gui.o quat.o turtle.o lsystem.o -lGL -lGLU ./libglut.so -lAntTweakBar

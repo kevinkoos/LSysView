@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <iostream>
+#include <algorithm>
 
 // math
 #define _USE_MATH_DEFINES
@@ -34,7 +35,7 @@
 
 // function prototypes:
 void	Animate( );
-void    NextIteration(bool);
+void    NextIteration();
 void    NextIterHandle(void*);
 void    CompleteDrawHandle(void*);
 void    AnimateDraw(void*);
@@ -63,14 +64,6 @@ void QuatReset(float* q);
 
 // title of these windows:
 extern const char *WINDOWTITLE;
-extern const char *GLUITITLE;
-
-// what the glui package defines as true and false:
-extern const int GLUITRUE;
-extern const int GLUIFALSE;
-
-// the escape key:
-#define ESCAPE		0x1b
 
 // initial window size:
 extern const int INIT_WINDOW_HEIGHT;
@@ -112,6 +105,8 @@ extern int		Xmouse, Ymouse;			// mouse values
 extern bool     bAnimate;
 extern float    Time;
 extern int      ms;
+extern bool     bTranslate;
+extern float    pScale;
 
 extern TwBar* bar;
 
@@ -124,6 +119,7 @@ extern float g_Rotation_Scene[];
 extern float g_Scene_Angle_x;
 extern float g_Scene_Angle_y;
 extern float color[];
+extern float colorp[];
 extern int MS_PER_CYCLE;
 
 extern Lsystem* Lsys;
@@ -133,7 +129,7 @@ extern std::vector<glm::vec3>   current_turtles;
 extern std::vector<glm::vec3>   vertices;
 extern std::vector<glm::vec3>   prev_vertices;
 extern bool bDraw;
-extern int  iDrawSpeed;
+extern bool bCamera;
 extern int  Generation;
 extern int  iSkip;
 

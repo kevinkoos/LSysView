@@ -279,13 +279,13 @@ void MouseMotion( int x, int y ) {
         float dx = x - Xmouse;
         
         if( ( ActiveButton & LEFT ) != 0 ) {
-            //x rotation
+            //x mouse rotation
             g_Scene_Angle_x = ANGFACT*dy;
-            SetQuaternionFromAxisAngle(x_axis, g_Scene_Angle_x, q_1);
+            SetQuaternionFromAxisAngle(y_axis, g_Scene_Angle_x, q_1);
             MultiplyQuaternions(q_1, g_Rotation_Scene, g_Rotation_Scene);
-            //y rotation
+            //y mouse rotation
             g_Scene_Angle_y = ANGFACT*dx;
-            SetQuaternionFromAxisAngle(y_axis, g_Scene_Angle_y, q_1);
+            SetQuaternionFromAxisAngle(x_axis, g_Scene_Angle_y, q_1);
             MultiplyQuaternions(q_1, g_Rotation_Scene, g_Rotation_Scene);
         }
 
