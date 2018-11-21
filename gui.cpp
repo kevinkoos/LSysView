@@ -79,6 +79,7 @@ void CompleteDrawHandle(void* data) {
     while(!turt_sys.empty()) {
         NextIteration();
     }
+    bScale = true;
 }
 
 void NextIterHandle(void* data) {
@@ -141,7 +142,7 @@ void InitGUI(void) {
     TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &MS_PER_CYCLE, " min=1 max=100 step=1 ");
     TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, " min=1 max=10 step=1 ");
     TwAddVarRW(bar, "Auto-Center", TW_TYPE_BOOLCPP, &bTranslate, " key=t ");
-    TwAddButton(bar, "Auto-Scale", &AutoScale, NULL, " key=s ");
+    TwAddButton(bar, "Scale Down", &AutoScale, NULL, " key=s ");
     TwAddVarRW(bar, "Color Hue", TW_TYPE_BOOLCPP, &bHue, NULL);
     
     TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " colormode=hls ");

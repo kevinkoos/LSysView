@@ -84,10 +84,10 @@ std::vector<glm::vec3>   prev_vertices;
 glm::vec3 autoScale;
 
 //3d hilbert
-float angle = 90;
-std::string axiom = "X";
-std::vector<std::string> rules{"^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>"};
-std::string vars = "X";
+// float angle = 90;
+// std::string axiom = "X";
+// std::vector<std::string> rules{"^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>"};
+// std::string vars = "X";
 
 //2d hilbert
 // float angle = 90;
@@ -100,6 +100,19 @@ std::string vars = "X";
 // std::string axiom = "X";
 // std::vector<std::string> rules{"F+[[X]-X]-F[-FX]+X","FF"};
 // std::string vars = "XF";
+
+//koch curve
+// float angle = 90;
+// std::string axiom = "F-F-F-F";
+// std::vector<std::string> rules{"FF-F-F-F-FF"};
+// std::string vars = "F";
+
+//shrub
+float angle = 22.5;
+std::string axiom = "A";
+std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
+std::string vars = "AFS";
+
 
 // main program:
 int main( int argc, char *argv[ ] ) {
@@ -153,27 +166,24 @@ void Animate( ) {
 }
 
 void AutoScale() {
-    // auto-scale WIP
-    float x_min = 0, y_min = 0, z_min = 0;
-    float max_min;
-    if (bScale && vertices.size() > 1) {
-        x_min = vertices[0].x;
-        y_min = vertices[0].y;
-        z_min = vertices[0].z;
-        for(int i = 1; i < vertices.size(); i++) {
-            x_min = std::min(x_min,vertices[i].x);
-            y_min = std::min(y_min,vertices[i].y);
-            z_min = std::min(z_min,vertices[i].z);
-        }
-        //get the maximum minimumm, scale by uniform amount
-        max_min = std::max(x_min, y_min);
-        max_min = std::max(max_min, z_min);
-        max_min = abs(max_min);
-        
-        autoScale[0] = 1/(2*(abs(cx)-max_min));
-        autoScale[1] = 1/(2*(abs(cy)-max_min));
-        autoScale[2] = 1/(2*(abs(cz)-max_min));
-    }
+    auto x_minmax = std::minmax_element(vertices.begin(), vertices.end(),
+      [](const glm::vec3 &a, const glm::vec3 &b) { return a.x < b.x; });
+    auto y_minmax = std::minmax_element(vertices.begin(), vertices.end(),
+      [](const glm::vec3 &a, const glm::vec3 &b) { return a.y < b.y; });
+    auto z_minmax = std::minmax_element(vertices.begin(), vertices.end(),
+      [](const glm::vec3 &a, const glm::vec3 &b) { return a.z < b.z; });
+    
+    float dx = abs((*x_minmax.second).x - (*x_minmax.first).x);
+    float dy = abs((*y_minmax.second).y - (*y_minmax.first).y);
+    float dz = abs((*z_minmax.second).z - (*z_minmax.first).z);
+    
+    if (dx < 0.01) { dx = 1; }
+    if (dy < 0.01) { dy = 1; }
+    if (dz < 0.01) { dz = 1; }
+    
+    autoScale[0] = 1/dx;
+    autoScale[1] = 1/dy;
+    autoScale[2] = 1/dz;
 }
 
 // produces the next iteration in lsystem
