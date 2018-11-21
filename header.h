@@ -107,6 +107,10 @@ extern float    Time;
 extern int      ms;
 extern bool     bTranslate;
 extern float    pScale;
+extern bool     bScale;
+extern bool     bHue;
+extern float cx, cy, cz;
+
 
 extern TwBar* bar;
 
@@ -129,8 +133,9 @@ extern std::vector<glm::vec3>   current_turtles;
 extern std::vector<glm::vec3>   vertices;
 extern std::vector<glm::vec3>   prev_vertices;
 extern bool bDraw;
-extern bool bCamera;
 extern int  Generation;
 extern int  iSkip;
+
+extern glm::vec3 autoScale;
 
 #endif

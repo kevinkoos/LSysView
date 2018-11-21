@@ -8,6 +8,9 @@
 const float ANGFACT = { 0.5f };
 const float SCLFACT = { 0.005f };
 
+const int   GLUT_WHEEL_DOWN = { 3 };
+const int   GLUT_WHEEL_UP   = { 4 };
+
 // initialize the glut and OpenGL libraries:
 //	also setup display lists and callback functions
 
@@ -236,6 +239,8 @@ void HsvRgb( float hsv[3], float rgb[3] ) {
 	rgb[2] = b;
 }
 
+/* ======================== CALLBACKS =======================*/
+
 // called when the mouse button transitions down or up:
 void MouseButton( int button, int state, int x, int y ) {
     //redirect to anttweakbars and run only it doesn't handle it
@@ -252,11 +257,20 @@ void MouseButton( int button, int state, int x, int y ) {
             case GLUT_RIGHT_BUTTON:
                 b = RIGHT;		break;
 
+            case 3:     //wheel up
+                Scale += 0.005;  break;
+                
+            case 4:     //wheel down
+                Scale -= 0.005;  break;
+                
             default:
                 b = 0;
                 fprintf( stderr, "Unknown mouse button: %d\n", button );
         }
-
+        
+        // scale guard
+        if(Scale < 0.001) { Scale = 0.001; }
+        
         // button down sets the bit, up clears the bit:
         if( state == GLUT_DOWN ) {
             Xmouse = x;
@@ -293,6 +307,8 @@ void MouseMotion( int x, int y ) {
             Scale += SCLFACT * (float) ( dx - dy );
             if(Scale < 0.01) { Scale = 0.01; }
         }
+        
+        
 
         Xmouse = x;			// new current position
         Ymouse = y;

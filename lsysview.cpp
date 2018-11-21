@@ -46,11 +46,12 @@ int		Xmouse, Ymouse;			// mouse values
 float   Time;                   // float time
 int     ms;                     // ms counter
 bool    bDraw;                  // true means draw animation
-bool    bCamera;                // true means alternate camera position
 int     Generation;             // current Generation number of l system
 int     iSkip;                  // # of line segments to draw each frame when bDraw true
 bool    bTranslate;             // true is auto-translate on
 float   pScale;                 // scale of the turtles
+bool    bScale;
+bool    bHue;
 
 // display lists
 GLuint AxesList;
@@ -65,8 +66,11 @@ float mat[4*4]; // rotation matrix
 float quat[4];
 float color[] = { 1.0f, 1.0f, 1.0f };
 float colorp[] = { 0.0f, 1.0f, 1.0f };
-int   MS_PER_CYCLE;
 float cx, cy, cz;
+float rgb[3];
+float hsv[3];
+float addColor;
+int   MS_PER_CYCLE;
 
 // lsystem and turtles
 Lsystem* Lsys;
@@ -77,12 +81,13 @@ std::vector<glm::vec3>   vertices;
 std::vector<glm::vec3>   prev_vertices;
 
 //tmp stuff
+glm::vec3 autoScale;
 
 //3d hilbert
-// float angle = 90;
-// std::string axiom = "X";
-// std::vector<std::string> rules{"^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>"};
-// std::string vars = "X";
+float angle = 90;
+std::string axiom = "X";
+std::vector<std::string> rules{"^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>"};
+std::string vars = "X";
 
 //2d hilbert
 // float angle = 90;
@@ -91,10 +96,10 @@ std::vector<glm::vec3>   prev_vertices;
 // std::string vars = "AB";
 
 //fractal plant
-float angle = 45;
-std::string axiom = "X";
-std::vector<std::string> rules{"F+[[X]-X]-F[-FX]+X","FF"};
-std::string vars = "XF";
+// float angle = 45;
+// std::string axiom = "X";
+// std::vector<std::string> rules{"F+[[X]-X]-F[-FX]+X","FF"};
+// std::string vars = "XF";
 
 // main program:
 int main( int argc, char *argv[ ] ) {
@@ -138,7 +143,6 @@ void Animate( ) {
     //exact timing per machine is unclear but this is easier to work with
     if(bAnimate && bDraw) { ms += 1; }
     ms %= MS_PER_CYCLE;
-    Time = ms/(float)MS_PER_CYCLE;
     
     if(turt_sys.empty()) {
         bDraw = false;
@@ -148,22 +152,48 @@ void Animate( ) {
 	glutPostRedisplay( );
 }
 
+void AutoScale() {
+    // auto-scale WIP
+    float x_min = 0, y_min = 0, z_min = 0;
+    float max_min;
+    if (bScale && vertices.size() > 1) {
+        x_min = vertices[0].x;
+        y_min = vertices[0].y;
+        z_min = vertices[0].z;
+        for(int i = 1; i < vertices.size(); i++) {
+            x_min = std::min(x_min,vertices[i].x);
+            y_min = std::min(y_min,vertices[i].y);
+            z_min = std::min(z_min,vertices[i].z);
+        }
+        //get the maximum minimumm, scale by uniform amount
+        max_min = std::max(x_min, y_min);
+        max_min = std::max(max_min, z_min);
+        max_min = abs(max_min);
+        
+        autoScale[0] = 1/(2*(abs(cx)-max_min));
+        autoScale[1] = 1/(2*(abs(cy)-max_min));
+        autoScale[2] = 1/(2*(abs(cz)-max_min));
+    }
+}
+
 // produces the next iteration in lsystem
 // iterates through all turtles until they have all drawn once
 // parses strings, interprets chars, and adds branches
+// enum for chars is located in turtle.hpp
 void NextIteration() {
     char c;
     int op_br;
     std::list<Turtle>::iterator turtle;
     std::list<std::string>::iterator t_string;
 
-    turtle = turt_sys.begin();                      //turtle back to begining
+    turtle = turt_sys.begin();                      
     t_string = systems.begin(); 
     current_turtles.clear();
     while (turtle != turt_sys.end()) {
+        // get next char in current turtle string
         c = (*t_string)[0];
         (*t_string).erase(0,1);
-        
+        // do action based off char, anything not specified is ignored
         switch(c) {
             case DRAW:
             case FORWARD:
@@ -217,8 +247,8 @@ void NextIteration() {
                 systems.back().pop_back();          //remove last char ']'
                 break;
                 
-            case POLY:                              //draw a polygon from closing '}' turtle positions
-                //make a functions but when integrating into opengl sample app
+            case POLY:                              //draw a polygon to closing '}' turtle positions
+                
                 
                 break;
                 
@@ -273,9 +303,15 @@ void Display( ) {
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity( );
 
+    // since we are using glScalef( ), be sure normals get unitized:
+	glEnable( GL_NORMALIZE );
+    
+    // set the eye position, look-at position, and up-vector:
+    gluLookAt( 0., 0., 5.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
+
     // auto-translate to center on origin
     cx = 0; cy = 0; cz = 0;
-    if (bTranslate) {
+    if (bTranslate || bScale) {
         for(int i = 0; i < vertices.size(); i++) {
             cx += vertices[i].x;
             cy += vertices[i].y;
@@ -286,6 +322,13 @@ void Display( ) {
         cz /= vertices.size();
     }
 
+    if (bScale) {
+        AutoScale();
+        bScale = false;
+    }
+    
+    glScalef(autoScale[0], autoScale[1], autoScale[2]);
+    
     // compute an iteration if specified
     if(bAnimate && bDraw && ms == 0) {
         for(int i = 0; i < iSkip; i++) {
@@ -293,27 +336,16 @@ void Display( ) {
         }
     }
     
-    // set the eye position, look-at position, and up-vector:
-    if(bCamera) {
-        gluLookAt( 0., 0., 0.,     1.0f, 0.0f, 0.0f,     1., 0., 0. );
-    } else {
-        gluLookAt( 0., 0., 5.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
-    }
-
     // rotate the scene and scale
     ConvertQuaternionToMatrix(g_Rotation_Scene, mat);
     glMultMatrixf(mat);
     glScalef(Scale, Scale, Scale);
 
-    
 	// possibly draw the axes:
 	if( AxesOn != 0 ) {
 		glColor3f( 1., 1., 1. );
 		glCallList( AxesList );
 	}
-
-	// since we are using glScalef( ), be sure normals get unitized:
-	glEnable( GL_NORMALIZE );
     
     // Rotate and draw shape
     glPushMatrix();
@@ -322,13 +354,31 @@ void Display( ) {
     ConvertQuaternionToMatrix(g_Rotation, mat);
     glMultMatrixf(mat);
 
+    
     // translate center to origin
-    glTranslatef(-cx, -cy, -cz);
+    if (bTranslate) {
+        glTranslatef(-cx, -cy, -cz);
+    }
+
+    // set hue color var if we're coloring
+    if (bHue) {
+        addColor = 360.0f/(float)vertices.size();
+        hsv[0] = 0; hsv[1] = 1; hsv[2] = 1;
+    }
+
     
     // draw the lines
     glColor3f(color[0], color[1], color[2]);
     glBegin( GL_LINES );
     for(int i = 0; i < vertices.size(); i++) {
+        
+        if(bHue) {
+            hsv[0] += addColor;
+            HsvRgb(hsv, rgb);
+            glColor3f(rgb[0], rgb[1], rgb[2]);
+            
+        }
+        
         glVertex3f(prev_vertices[i].x, prev_vertices[i].y, prev_vertices[i].z);
         glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
     }
