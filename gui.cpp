@@ -4,6 +4,8 @@
  */ 
 #include "header.h"
 
+int iCurrentGen;
+
 //safelty close everything
 void Terminate(void* dt) {
     glutSetWindow( MainWindow );
@@ -15,7 +17,7 @@ void Terminate(void* dt) {
 }
 
 
-void ResetDrawing(void* data) {
+void ResetDrawing(void* data) {    
     //clear vectors
     vertices.clear();
     prev_vertices.clear();
@@ -27,7 +29,7 @@ void ResetDrawing(void* data) {
     vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     prev_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     turt_sys.push_back(Turtle());
-    systems.push_back(Lsys->get());
+    systems.push_back(Lsys->get(iCurrentGen));
     
     Generation = Lsys->get_gen();
     bDraw = false;
@@ -63,6 +65,7 @@ void Reset(void* data) {
     Time = 0;
     MS_PER_CYCLE = 10;
     Generation = Lsys->get_gen();
+    iCurrentGen = 0;
     iSkip = 1;
         
     //reset camera stuff
@@ -102,6 +105,18 @@ void AutoScale(void* data) {
     bScale = true;
 }
 
+void GenUp(void* data) {
+    if(iCurrentGen > Generation) { Lsys->next(); }
+    iCurrentGen++;
+    CompleteDrawHandle(NULL);
+}
+
+void GenDown(void* data) {
+    iCurrentGen--;
+    if(iCurrentGen < 0) { iCurrentGen = 0; } //no funny business
+    CompleteDrawHandle(NULL);
+}
+
 void InitGUI(void) {
     
     //initalize anttweakbars
@@ -125,10 +140,11 @@ void InitGUI(void) {
     // create tweak bar
     bar = TwNewBar("Controls");
     TwDefine(" GLOBAL help='Basic tweak bar.' ");
-    TwDefine(" Controls size='250 500' color='110 110 110' ");
+    TwDefine(" Controls size='250 540' color='110 110 110' ");
     
     TwAddVarRW(bar, "Scale", TW_TYPE_FLOAT, &Scale, 
-               " min=0.001 max=2.5 step=0.001 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
+               " min=0.01 step=0.01 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
+    TwAddVarRW(bar, "Animate Scale", TW_TYPE_INT32, &iAniScale, " min=-10 max=10 step=1 ");
     TwAddVarRW(bar, "Turtle Scale", TW_TYPE_FLOAT, &pScale, 
                " min=0.01 max=5 step=0.01 help='Scale the size of the turtles.' ");
 
@@ -153,9 +169,12 @@ void InitGUI(void) {
     TwAddButton(bar, "Next Iteration", &NextIterHandle, NULL, NULL);
     TwAddButton(bar, "Animated Draw", &AnimateDraw, NULL, NULL);
     TwAddButton(bar, "Reset Lsys", &ResetDrawing, NULL, NULL);
-    TwAddButton(bar, "Next Lsys", &NextLsystem, NULL, NULL);
-    TwAddVarRO(bar, "Generation:", TW_TYPE_INT32, &Generation, NULL);
-    
+    //TwAddButton(bar, "Next Lsys", &NextLsystem, NULL, NULL);
+    //TwAddVarRO(bar, "Generation:", TW_TYPE_INT32, &Generation, NULL);
+    TwAddVarRO(bar, "Current Gen:", TW_TYPE_INT32, &iCurrentGen, NULL);
+    TwAddButton(bar, "Gen UP", &GenUp, NULL, " key=RIGHT ");
+    TwAddButton(bar, "Gen Down", &GenDown, NULL, " key=LEFT ");
+    TwAddVarRW(bar, "Angle", TW_TYPE_FLOAT, &angle, " min=0 max=360 step=0.01 ");
     
     TwAddSeparator(bar, NULL, NULL);
     TwAddButton(bar, "RESET CAMERA", &ResetCamera, NULL, NULL);

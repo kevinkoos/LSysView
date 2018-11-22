@@ -54,6 +54,7 @@ void    InitGUI(void);
 void    MouseMotion( int x, int y );
 void    MouseButton( int button, int state, int x, int y );
 void    Keyboard( unsigned char c, int x, int y );
+void    ResetDrawing(void*);
 
 void SetQuaternionFromAxisAngle(const float *axis, float angle, float *quat);
 void ConvertQuaternionToMatrix(const float *quat, float *mat);
@@ -109,6 +110,10 @@ extern bool     bTranslate;
 extern float    pScale;
 extern bool     bScale;
 extern bool     bHue;
+extern int      iAniScale;
+extern int      iCurrentGen;
+
+
 extern float cx, cy, cz;
 
 
@@ -135,6 +140,7 @@ extern std::vector<glm::vec3>   prev_vertices;
 extern bool bDraw;
 extern int  Generation;
 extern int  iSkip;
+extern float angle;
 
 extern glm::vec3 autoScale;
 

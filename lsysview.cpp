@@ -52,6 +52,7 @@ bool    bTranslate;             // true is auto-translate on
 float   pScale;                 // scale of the turtles
 bool    bScale;
 bool    bHue;
+int     iAniScale;
 
 // display lists
 GLuint AxesList;
@@ -72,6 +73,7 @@ float hsv[3];
 float addColor;
 int   MS_PER_CYCLE;
 
+
 // lsystem and turtles
 Lsystem* Lsys;
 std::list<std::string>   systems;
@@ -82,6 +84,7 @@ std::vector<glm::vec3>   prev_vertices;
 
 //tmp stuff
 glm::vec3 autoScale;
+
 
 //3d hilbert
 // float angle = 90;
@@ -98,7 +101,7 @@ glm::vec3 autoScale;
 //fractal plant
 // float angle = 45;
 // std::string axiom = "X";
-// std::vector<std::string> rules{"F+[[X]-X]-F[-FX]+X","FF"};
+// std::vector<std::string> rules{"F+[>[X]-X]-F>[-FX]+X","F>F"};
 // std::string vars = "XF";
 
 //koch curve
@@ -113,6 +116,18 @@ std::string axiom = "A";
 std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
 std::string vars = "AFS";
 
+//self similar curve
+// float angle = 45;
+// std::string axiom = "F";
+// std::vector<std::string> rules{"F+D+F","D-F-D"};
+// std::string vars = "FD";
+
+// float angle = 60;
+// std::string axiom = "FFFFFA";
+// std::vector<std::string> rules{"[vF[vF]FFA]>>[vF[vF]FFA]>>[vF[vF]FFA]"};
+// std::string vars = "A";
+
+float p_angle = angle;
 
 // main program:
 int main( int argc, char *argv[ ] ) {
@@ -161,6 +176,10 @@ void Animate( ) {
         bDraw = false;
     }
     
+    if(iAniScale != 0) {
+        Scale += iAniScale;
+    }
+    
 	glutSetWindow( MainWindow );
 	glutPostRedisplay( );
 }
@@ -181,9 +200,14 @@ void AutoScale() {
     if (dy < 0.01) { dy = 1; }
     if (dz < 0.01) { dz = 1; }
     
-    autoScale[0] = 1/dx;
-    autoScale[1] = 1/dy;
-    autoScale[2] = 1/dz;
+    float maxmin;
+    if (dx > dy && dx > dz) { maxmin = dx; }
+    else if(dy > dz) { maxmin = dy; }
+    else { maxmin = dz; }
+    
+    autoScale[0] = 1/maxmin;
+    autoScale[1] = 1/maxmin;
+    autoScale[2] = 1/maxmin;
 }
 
 // produces the next iteration in lsystem
@@ -305,7 +329,7 @@ void Display( ) {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity( );
 	if( WhichProjection == ORTHO )
-		glOrtho( -3., 3.,     -3., 3.,     0.1, 1000. );
+		glOrtho( -3., 3.,     -3., 3.,     -100, 100000. );
 	else
 		gluPerspective( 90., 1.,	0.1, 1000. );
 
@@ -317,7 +341,7 @@ void Display( ) {
 	glEnable( GL_NORMALIZE );
     
     // set the eye position, look-at position, and up-vector:
-    gluLookAt( 0., 0., 5.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
+    gluLookAt( 0., 0., 1.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
 
     // auto-translate to center on origin
     cx = 0; cy = 0; cz = 0;
@@ -331,6 +355,7 @@ void Display( ) {
         cy /= vertices.size();
         cz /= vertices.size();
     }
+    
 
     if (bScale) {
         AutoScale();
@@ -345,6 +370,12 @@ void Display( ) {
             NextIteration();
         }
     }
+    
+    if(angle != p_angle) {
+        CompleteDrawHandle(NULL);
+        p_angle = angle;
+    }
+    
     
     // rotate the scene and scale
     ConvertQuaternionToMatrix(g_Rotation_Scene, mat);
@@ -403,8 +434,11 @@ void Display( ) {
         glCallList(SphereList);
         glPopMatrix();
     }
-    
+
     glPopMatrix();
+
+
+
     
     // draw tweak bars
     TwDraw();
