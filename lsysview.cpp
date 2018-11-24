@@ -15,12 +15,10 @@ const char *WINDOWTITLE = { "LSysView" };
 
 // initial window size:
 const int INIT_WINDOW_HEIGHT = { 1000 };
-const int INIT_WINDOW_WIDTH = { 1000 };
+const int INIT_WINDOW_WIDTH = { 1400 };
 
 // minimum allowable scale factor:
 const float MINSCALE = { 0.05f };
-
-// ENUMS //
 
 // window background color (rgba):
 const GLfloat BACKCOLOR[ ] = { 0.5, 0.5, 0.5, 1. };
@@ -34,25 +32,28 @@ const int LEFT   = { 4 };
 const int MIDDLE = { 2 };
 const int RIGHT  = { 1 };
 
-
 // non-constant global variables:
+float   Time;                   // float time
+float   fPointScale;            // scale of the turtles
+float	Scale;					// scaling factor
+int		MainWindow;				// window id for main graphics window
+int     Generation;             // current Generation number of l system
+int     iAniScale;              // how much to incrementally scale down/up by, default 0
+int     iFramePerCycle;         // # of frames between animated system updates
+int     iSkip;                  // # of line segments to draw each frame when bDraw true
+int     iCounter;               // counter
+int		Xmouse, Ymouse;			// mouse values
 int		ActiveButton;			// current button that is down
 bool	AxesOn;					// true means to draw the axes
-int		MainWindow;				// window id for main graphics window
-float	Scale;					// scaling factor
 bool    bAnimate;               // true mean to activate animation
-bool	WhichProjection;        // otho or perspective
-int		Xmouse, Ymouse;			// mouse values
-float   Time;                   // float time
-int     ms;                     // ms counter
+bool	bProjection;        // otho or perspective
 bool    bDraw;                  // true means draw animation
-int     Generation;             // current Generation number of l system
-int     iSkip;                  // # of line segments to draw each frame when bDraw true
 bool    bTranslate;             // true is auto-translate on
-float   pScale;                 // scale of the turtles
-bool    bScale;
-bool    bHue;
-int     iAniScale;
+bool    bScale;                 // true means to scale the scene down once, set false after
+bool    bHue;                   // true means to add a continuously changing hue to the curve
+bool    bOneIter;               // true means draw one turtle iteration
+bool    bCompIter;              // true means draw until the curve is complete
+bool    bAutoRotate;            // true means to rotate on the y axis
 
 // display lists
 GLuint AxesList;
@@ -61,18 +62,17 @@ GLuint SphereList;
 // rotations and atb stuff
 float g_Rotation[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 float g_Rotation_Scene[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+float g_Rotation_Animation[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 float g_Scene_Angle_x;          // rotation from mouse x movement
 float g_Scene_Angle_y;          // rotation from mouse y movement
-float mat[4*4]; // rotation matrix
-float quat[4];
+float g_Rotation_Angle = 0;     // rotation from auto rotation
+float mat[4*4];                 // tmp rotation matrix
 float color[] = { 1.0f, 1.0f, 1.0f };
 float colorp[] = { 0.0f, 1.0f, 1.0f };
-float cx, cy, cz;
 float rgb[3];
 float hsv[3];
 float addColor;
-int   MS_PER_CYCLE;
-
+glm::vec3 autoScale;
 
 // lsystem and turtles
 Lsystem* Lsys;
@@ -82,10 +82,6 @@ std::vector<glm::vec3>   current_turtles;
 std::vector<glm::vec3>   vertices;
 std::vector<glm::vec3>   prev_vertices;
 
-//tmp stuff
-glm::vec3 autoScale;
-
-
 //3d hilbert
 // float angle = 90;
 // std::string axiom = "X";
@@ -93,10 +89,10 @@ glm::vec3 autoScale;
 // std::string vars = "X";
 
 //2d hilbert
-// float angle = 90;
-// std::string axiom = "A";
-// std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
-// std::string vars = "AB";
+float angle = 90;
+std::string axiom = "A";
+std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
+std::string vars = "AB";
 
 //fractal plant
 // float angle = 45;
@@ -111,10 +107,10 @@ glm::vec3 autoScale;
 // std::string vars = "F";
 
 //shrub
-float angle = 22.5;
-std::string axiom = "A";
-std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
-std::string vars = "AFS";
+// float angle = 22.5;
+// std::string axiom = "A";
+// std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
+// std::string vars = "AFS";
 
 //self similar curve
 // float angle = 45;
@@ -127,6 +123,7 @@ std::string vars = "AFS";
 // std::vector<std::string> rules{"[vF[vF]FFA]>>[vF[vF]FFA]>>[vF[vF]FFA]"};
 // std::string vars = "A";
 
+// has to go here
 float p_angle = angle;
 
 // main program:
@@ -142,12 +139,8 @@ int main( int argc, char *argv[ ] ) {
     // setup gui and anttweaksbar
     InitGUI( );
     
+    // inialize lsys
     Lsys = new Lsystem(axiom, rules, vars);
-    Lsys->next();
-    systems.push_back(Lsys->get());
-    turt_sys.push_back(Turtle());
-    vertices.push_back(glm::vec3(0., 0., 0.));
-    prev_vertices.push_back(glm::vec3(0., 0., 0.));
     
 	// create the display structures that will not change:
 	InitLists( );
@@ -167,10 +160,9 @@ int main( int argc, char *argv[ ] ) {
 
 // animates the scene, 
 void Animate( ) {
-    //make ms a counter
-    //exact timing per machine is unclear but this is easier to work with
-    if(bAnimate && bDraw) { ms += 1; }
-    ms %= MS_PER_CYCLE;
+    
+    if(bAnimate && bDraw) { iCounter += 1; }
+    iCounter %= iFramePerCycle;
     
     if(turt_sys.empty()) {
         bDraw = false;
@@ -184,7 +176,9 @@ void Animate( ) {
 	glutPostRedisplay( );
 }
 
+// scale a drawing down uniformly by the largest edge size of the curves bounding box
 void AutoScale() {
+    // get the minimum and maxmum values for x,y, and z
     auto x_minmax = std::minmax_element(vertices.begin(), vertices.end(),
       [](const glm::vec3 &a, const glm::vec3 &b) { return a.x < b.x; });
     auto y_minmax = std::minmax_element(vertices.begin(), vertices.end(),
@@ -192,10 +186,12 @@ void AutoScale() {
     auto z_minmax = std::minmax_element(vertices.begin(), vertices.end(),
       [](const glm::vec3 &a, const glm::vec3 &b) { return a.z < b.z; });
     
+    // determine the edge length
     float dx = abs((*x_minmax.second).x - (*x_minmax.first).x);
     float dy = abs((*y_minmax.second).y - (*y_minmax.first).y);
     float dz = abs((*z_minmax.second).z - (*z_minmax.first).z);
     
+    // checks for 0s, 
     if (dx < 0.01) { dx = 1; }
     if (dy < 0.01) { dy = 1; }
     if (dz < 0.01) { dz = 1; }
@@ -208,6 +204,20 @@ void AutoScale() {
     autoScale[0] = 1/maxmin;
     autoScale[1] = 1/maxmin;
     autoScale[2] = 1/maxmin;
+}
+
+// calculate the center of the curve through averages and centers curve on origin
+void AutoTranslate() {
+    float cx = 0, cy = 0, cz = 0;
+    for(int i = 0; i < vertices.size(); i++) {
+        cx += vertices[i].x;
+        cy += vertices[i].y;
+        cz += vertices[i].z;
+    }
+    cx /= vertices.size();
+    cy /= vertices.size();
+    cz /= vertices.size();
+    glTranslatef(-cx, -cy, -cz);
 }
 
 // produces the next iteration in lsystem
@@ -223,6 +233,7 @@ void NextIteration() {
     turtle = turt_sys.begin();                      
     t_string = systems.begin(); 
     current_turtles.clear();
+    // loop through all the turtles in the system
     while (turtle != turt_sys.end()) {
         // get next char in current turtle string
         c = (*t_string)[0];
@@ -309,10 +320,11 @@ void Display( ) {
 	glDrawBuffer( GL_BACK );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    // enable depth
     glEnable( GL_DEPTH_TEST );
     
 	// specify shading to be flat:
-	//glShadeModel( GL_FLAT );
+	// glShadeModel( GL_FLAT );
 
 	// set the viewport to a square centered in the window:
 	GLsizei vx = glutGet( GLUT_WINDOW_WIDTH );
@@ -325,13 +337,13 @@ void Display( ) {
 	// set the viewing volume:
 	// remember that the Z clipping  values are actually
 	// given as DISTANCES IN FRONT OF THE EYE
-	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity( );
-	if( WhichProjection == ORTHO )
-		glOrtho( -3., 3.,     -3., 3.,     -100, 100000. );
-	else
-		gluPerspective( 90., 1.,	0.1, 1000. );
+	if( bProjection == ORTHO ) {
+        glOrtho( -3., 3., -3., 3., -100, 100000. );
+    } else {
+		gluPerspective( 90., 1., 0.1, 1000. );
+    }
 
 	// place the objects into the scene:
 	glMatrixMode( GL_MODELVIEW );
@@ -343,39 +355,34 @@ void Display( ) {
     // set the eye position, look-at position, and up-vector:
     gluLookAt( 0., 0., 1.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
 
-    // auto-translate to center on origin
-    cx = 0; cy = 0; cz = 0;
-    if (bTranslate || bScale) {
-        for(int i = 0; i < vertices.size(); i++) {
-            cx += vertices[i].x;
-            cy += vertices[i].y;
-            cz += vertices[i].z;
-        }
-        cx /= vertices.size();
-        cy /= vertices.size();
-        cz /= vertices.size();
-    }
-    
-
-    if (bScale) {
-        AutoScale();
-        bScale = false;
-    }
-    
-    glScalef(autoScale[0], autoScale[1], autoScale[2]);
-    
     // compute an iteration if specified
-    if(bAnimate && bDraw && ms == 0) {
+    if(bAnimate && bDraw && iCounter == 0) {
         for(int i = 0; i < iSkip; i++) {
             NextIteration();
         }
+    } else if(bOneIter || bCompIter){ 
+        do {
+            
+            NextIteration();
+            
+        } while(bCompIter && !turt_sys.empty());
+        bOneIter = false;
+        bCompIter = false;
     }
     
-    if(angle != p_angle) {
+    // apply an auto rotation on the vertical axis (x-axis)
+    if (bAutoRotate) {
+        g_Rotation_Angle += 0.5;
+        SetQuaternionFromAxisAngle(x_axis, g_Rotation_Angle, g_Rotation_Animation);
+        ConvertQuaternionToMatrix(g_Rotation_Animation, mat);
+        glMultMatrixf(mat);
+    }
+        
+    // if the angle has changed, draw the complete scene
+    if (angle != p_angle) {
         CompleteDrawHandle(NULL);
         p_angle = angle;
     }
-    
     
     // rotate the scene and scale
     ConvertQuaternionToMatrix(g_Rotation_Scene, mat);
@@ -388,6 +395,15 @@ void Display( ) {
 		glCallList( AxesList );
 	}
     
+    // call autoscale. somewhat costly function to run every display so bScale controls it
+    if (bScale) {
+        AutoScale();
+        bScale = false;
+    }
+    
+    // apply the autoscaleing to the object
+    glScalef(autoScale[0], autoScale[1], autoScale[2]);
+    
     // Rotate and draw shape
     glPushMatrix();
 
@@ -395,10 +411,10 @@ void Display( ) {
     ConvertQuaternionToMatrix(g_Rotation, mat);
     glMultMatrixf(mat);
 
-    
     // translate center to origin
+
     if (bTranslate) {
-        glTranslatef(-cx, -cy, -cz);
+        AutoTranslate();
     }
 
     // set hue color var if we're coloring
@@ -407,19 +423,17 @@ void Display( ) {
         hsv[0] = 0; hsv[1] = 1; hsv[2] = 1;
     }
 
-    
     // draw the lines
     glColor3f(color[0], color[1], color[2]);
     glBegin( GL_LINES );
     for(int i = 0; i < vertices.size(); i++) {
-        
+        // apply a steady hue change 
         if(bHue) {
             hsv[0] += addColor;
             HsvRgb(hsv, rgb);
             glColor3f(rgb[0], rgb[1], rgb[2]);
             
         }
-        
         glVertex3f(prev_vertices[i].x, prev_vertices[i].y, prev_vertices[i].z);
         glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
     }
@@ -430,15 +444,12 @@ void Display( ) {
     for(int j = 0; j < current_turtles.size(); j++) {
         glPushMatrix();
         glTranslatef(current_turtles[j].x, current_turtles[j].y, current_turtles[j].z);
-        glScalef(pScale, pScale, pScale);
+        glScalef(fPointScale, fPointScale, fPointScale);
         glCallList(SphereList);
         glPopMatrix();
     }
 
     glPopMatrix();
-
-
-
     
     // draw tweak bars
     TwDraw();

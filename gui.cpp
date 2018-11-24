@@ -6,7 +6,7 @@
 
 int iCurrentGen;
 
-//safelty close everything
+// safelty close everything
 void Terminate(void* dt) {
     glutSetWindow( MainWindow );
     glDeleteLists(AxesList, 1);
@@ -16,16 +16,16 @@ void Terminate(void* dt) {
     TwTerminate();
 }
 
-
+// reset variables associated with the curve itself
 void ResetDrawing(void* data) {    
-    //clear vectors
+    //clear vectors containing the previous curve
     vertices.clear();
     prev_vertices.clear();
     current_turtles.clear();
     turt_sys.clear();
     systems.clear();
     
-    //initalize
+    //initalize vectors to start a new drawing
     vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     prev_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     turt_sys.push_back(Turtle());
@@ -47,7 +47,7 @@ void ResetCamera(void* data) {
     QuatReset(g_Rotation_Scene);
     
     Scale  = 1.0;
-    pScale = 1.0;
+    fPointScale = 1.0;
 }
 
 // reset the transformations and the colors:
@@ -55,15 +55,13 @@ void ResetCamera(void* data) {
 // the glut main loop is responsible for redrawing the scene
 void Reset(void* data) {
 	AxesOn = false;
-	Scale  = 1.0;
-    pScale = 1.0;
     bScale = false;
-	WhichProjection = PERSP;
+	bProjection = PERSP;
     bAnimate = true;
     bTranslate = true;
-    ms = 0;
+    iCounter = 0;
     Time = 0;
-    MS_PER_CYCLE = 10;
+    iFramePerCycle = 10;
     Generation = Lsys->get_gen();
     iCurrentGen = 0;
     iSkip = 1;
@@ -75,19 +73,19 @@ void Reset(void* data) {
     ResetDrawing(NULL);
 }
 
+
 void CompleteDrawHandle(void* data) {
     if(!vertices.empty()){
         ResetDrawing(NULL);
     }
-    while(!turt_sys.empty()) {
-        NextIteration();
-    }
+    bCompIter = true;
     bScale = true;
 }
 
 void NextIterHandle(void* data) {
-    NextIteration(); 
+    bOneIter = true;
 }
+
 
 void AnimateDraw(void* data) {
     if(!vertices.empty()){
@@ -134,47 +132,57 @@ void InitGUI(void) {
     
     //allows for the use of modifier keys
     TwGLUTModifiersFunc(glutGetModifiers);
-        
-
-    
-    // create tweak bar
+            
+    // create main tweak bar
     bar = TwNewBar("Controls");
     TwDefine(" GLOBAL help='Basic tweak bar.' ");
     TwDefine(" Controls size='250 540' color='110 110 110' ");
     
     TwAddVarRW(bar, "Scale", TW_TYPE_FLOAT, &Scale, 
-               " min=0.01 step=0.01 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
-    TwAddVarRW(bar, "Animate Scale", TW_TYPE_INT32, &iAniScale, " min=-10 max=10 step=1 ");
-    TwAddVarRW(bar, "Turtle Scale", TW_TYPE_FLOAT, &pScale, 
-               " min=0.01 max=5 step=0.01 help='Scale the size of the turtles.' ");
-
+        " min=0.01 step=0.01 keyIncr=s keyDecr=S help='Scale the object (1=original size).' ");
+    TwAddVarRW(bar, "Animate Scale", TW_TYPE_INT32, &iAniScale,
+        " min=-10 max=10 step=1 help='Increment counter to scale up or down the curve.' ");
+    TwAddVarRW(bar, "Turtle Scale", TW_TYPE_FLOAT, &fPointScale, 
+        " min=0.01 max=5 step=0.01 help='Scale the size of the turtles.' ");
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation, 
-               " label='Object rotation' opened=true help='Change the object orientation.' ");
+        " label='Object rotation' opened=true help='Change the object orientation.' ");
     
     TwAddSeparator(bar, NULL, NULL);
-    TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a ");
-    TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &WhichProjection, " key=p ");
-    TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &bAnimate, " key=f ");
-    TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &MS_PER_CYCLE, " min=1 max=100 step=1 ");
-    TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, " min=1 max=10 step=1 ");
-    TwAddVarRW(bar, "Auto-Center", TW_TYPE_BOOLCPP, &bTranslate, " key=t ");
-    TwAddButton(bar, "Scale Down", &AutoScale, NULL, " key=s ");
-    TwAddVarRW(bar, "Color Hue", TW_TYPE_BOOLCPP, &bHue, NULL);
-    
-    TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " colormode=hls ");
-    TwAddVarRW(bar, "Turtle Color", TW_TYPE_COLOR3F, &colorp, " colormode=hls ");
+    TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a help='Turn the axes on or off.' ");
+    TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &bProjection,
+        " key=p help='Change between perspective and orthographic projection.' ");
+    TwAddVarRW(bar, "Auto-Rotate", TW_TYPE_BOOLCPP, &bAutoRotate,
+        " help='Applies a steady rotation about the y-axis on the object.' ");
+    TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &bAnimate, " key=f help='Toggle on or off the animation.' ");
+    TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &iFramePerCycle,
+        " min=1 max=100 step=1 help='Use to control the number of frames between each iteration of the turtles drawing.' ");
+    TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, 
+        " min=1 max=10 step=1 help='Control the number of iterations to draw per draw when drawing the animation.' ");
+    TwAddVarRW(bar, "Auto-Center", TW_TYPE_BOOLCPP, &bTranslate, 
+        " key=t help='Toggle on or off auto centering the curve on the origin.' ");
+    TwAddVarRW(bar, "Color Hue", TW_TYPE_BOOLCPP, &bHue,
+        " help='Add a steadily changing color change to the curve. Working in order of drawing.' ");
+    TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color,
+        " colormode=hls help='Change the color of the curve.' ");
+    TwAddVarRW(bar, "Turtle Color", TW_TYPE_COLOR3F, &colorp, 
+        " colormode=hls help='Change the color of the turtles.' ");
     
     TwAddSeparator(bar, NULL, NULL);
-    TwAddButton(bar, "Complete Draw", &CompleteDrawHandle, NULL, NULL);
-    TwAddButton(bar, "Next Iteration", &NextIterHandle, NULL, NULL);
-    TwAddButton(bar, "Animated Draw", &AnimateDraw, NULL, NULL);
+    TwAddButton(bar, "Complete Draw", &CompleteDrawHandle, NULL, 
+        " help='Draw a complete scene of the curve.' ");
+    TwAddButton(bar, "Next Iteration", &NextIterHandle, NULL, 
+        " help='Draw the next iteration of the curve. CAn be used mid animation if frozen.' ");
+    TwAddButton(bar, "Animated Draw", &AnimateDraw, NULL,
+        " help='Does an animated drawing of the curve. Can draw multiple turtles in branching systems.' ");
     TwAddButton(bar, "Reset Lsys", &ResetDrawing, NULL, NULL);
-    //TwAddButton(bar, "Next Lsys", &NextLsystem, NULL, NULL);
-    //TwAddVarRO(bar, "Generation:", TW_TYPE_INT32, &Generation, NULL);
-    TwAddVarRO(bar, "Current Gen:", TW_TYPE_INT32, &iCurrentGen, NULL);
-    TwAddButton(bar, "Gen UP", &GenUp, NULL, " key=RIGHT ");
-    TwAddButton(bar, "Gen Down", &GenDown, NULL, " key=LEFT ");
-    TwAddVarRW(bar, "Angle", TW_TYPE_FLOAT, &angle, " min=0 max=360 step=0.01 ");
+    TwAddVarRO(bar, "Current Gen:", TW_TYPE_INT32, &iCurrentGen, 
+        " help='The current generation of the curve. Starts at generation 0.' ");
+    TwAddButton(bar, "Gen UP", &GenUp, NULL, 
+        " key=RIGHT help='Increase the current curve generation by 1 and do a complete draw.' ");
+    TwAddButton(bar, "Gen Down", &GenDown, NULL, 
+        " key=LEFT help='Decrease the current generation of the curve and do a complete draw.' ");
+    TwAddVarRW(bar, "Angle", TW_TYPE_FLOAT, &angle, 
+        " min=0 max=360 step=0.1 precision=2 help='Increase or Decrease the working angle of the curve. Forces a complete draw of the curve.' ");
     
     TwAddSeparator(bar, NULL, NULL);
     TwAddButton(bar, "RESET CAMERA", &ResetCamera, NULL, NULL);

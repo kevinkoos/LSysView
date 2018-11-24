@@ -97,24 +97,26 @@ extern const float y_axis[];
 extern const float z_axis[];
 
 // non-constant global variables:
-extern int		ActiveButton;			// current button that is down
-extern bool		AxesOn;					// != 0 means to draw the axes
-extern int		MainWindow;				// window id for main graphics window
-extern float	Scale;					// scaling factor
-extern bool		WhichProjection;		// ORTHO or PERSP
-extern int		Xmouse, Ymouse;			// mouse values
-extern bool     bAnimate;
 extern float    Time;
-extern int      ms;
-extern bool     bTranslate;
-extern float    pScale;
-extern bool     bScale;
-extern bool     bHue;
+extern float	Scale;					// scaling factor
+extern float    fPointScale;
 extern int      iAniScale;
 extern int      iCurrentGen;
+extern int		MainWindow;				// window id for main graphics window
+extern int      iFramePerCycle;
+extern int		ActiveButton;			// current button that is down
+extern int      iCounter;
+extern int		Xmouse, Ymouse;			// mouse values
+extern bool		AxesOn;					// != 0 means to draw the axes
+extern bool		bProjection;		// ORTHO or PERSP
+extern bool     bAnimate;
+extern bool     bTranslate;
+extern bool     bScale;
+extern bool     bHue;
 
-
-extern float cx, cy, cz;
+extern bool     bOneIter;
+extern bool     bCompIter;
+extern bool     bAutoRotate;
 
 
 extern TwBar* bar;
@@ -129,7 +131,6 @@ extern float g_Scene_Angle_x;
 extern float g_Scene_Angle_y;
 extern float color[];
 extern float colorp[];
-extern int MS_PER_CYCLE;
 
 extern Lsystem* Lsys;
 extern std::list<std::string>   systems;
