@@ -5,6 +5,15 @@
 #include "header.h"
 
 int iCurrentGen;
+TwBar* bar;
+TwBar* stringbar;
+
+
+void LoadLsystem(void* data) {
+    delete Lsys;
+    Lsys = new Lsystem(axiom, rules, vars);
+    iCurrentGen = 0;
+}
 
 // safelty close everything
 void Terminate(void* dt) {
@@ -65,7 +74,8 @@ void Reset(void* data) {
     Generation = Lsys->get_gen();
     iCurrentGen = 0;
     iSkip = 1;
-        
+    LoadLsystem(NULL);    
+    
     //reset camera stuff
     ResetCamera(NULL);
     
@@ -115,10 +125,13 @@ void GenDown(void* data) {
     CompleteDrawHandle(NULL);
 }
 
+// Function called to copy the content of a std::string (souceString) handled 
+// by the AntTweakBar library to destinationClientString handled by our application
+void TW_CALL CopyStdStringToClient(std::string& destination, const std::string& source) {
+    destination = source;
+}
+
 void InitGUI(void) {
-    
-    //initalize anttweakbars
-    TwBar* bar;
     
     //initalize tweak bars
     TwInit(TW_OPENGL, NULL);
@@ -133,6 +146,9 @@ void InitGUI(void) {
     //allows for the use of modifier keys
     TwGLUTModifiersFunc(glutGetModifiers);
             
+    // Define the required callback function to copy a std::string
+    TwCopyStdStringToClientFunc(CopyStdStringToClient);
+
     // create main tweak bar
     bar = TwNewBar("Controls");
     TwDefine(" GLOBAL help='Basic tweak bar.' ");
@@ -181,8 +197,7 @@ void InitGUI(void) {
         " key=RIGHT help='Increase the current curve generation by 1 and do a complete draw.' ");
     TwAddButton(bar, "Gen Down", &GenDown, NULL, 
         " key=LEFT help='Decrease the current generation of the curve and do a complete draw.' ");
-    TwAddVarRW(bar, "Angle", TW_TYPE_FLOAT, &angle, 
-        " min=0 max=360 step=0.1 precision=2 help='Increase or Decrease the working angle of the curve. Forces a complete draw of the curve.' ");
+  
     
     TwAddSeparator(bar, NULL, NULL);
     TwAddButton(bar, "RESET CAMERA", &ResetCamera, NULL, NULL);
@@ -190,9 +205,18 @@ void InitGUI(void) {
     TwAddButton(bar, "EXIT", &Terminate, NULL, " key=q ");
     
     
-    TwBar* stringbar = TwNewBar("L-System");
+    stringbar = TwNewBar("L-System");
+    TwDefine(" L-System size='200 150' color='110 110 110' position='20 600' valueswidth=fit ");
     
-    TwAddButton(stringbar, "TEST", NULL, NULL, NULL);
+    
+    TwAddVarRW(stringbar, "Axiom", TW_TYPE_STDSTRING, &axiom, NULL);
+    TwAddVarRW(stringbar, "Variables", TW_TYPE_STDSTRING, &vars, NULL);
+    TwAddVarRW(stringbar, "Angle", TW_TYPE_FLOAT, &angle, 
+        " min=0 max=360 step=0.1 precision=2 help='Increase or Decrease the working angle of the curve. Forces a complete draw of the curve.' ");
+    TwAddVarRW(stringbar, "Rule 1", TW_TYPE_STDSTRING, &(rules[0]), NULL);
+    TwAddVarRW(stringbar, "Rule 2", TW_TYPE_STDSTRING, &(rules[1]), NULL);
+    TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, NULL);
+
 }
 
 

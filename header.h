@@ -2,7 +2,7 @@
 #define HEADER_H
 
 // base libraries 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cctype>
 #include <iostream>
 #include <algorithm>
@@ -141,5 +141,12 @@ extern int  iSkip;
 extern float angle;
 
 extern glm::vec3 autoScale;
+
+// l-system
+
+extern float angle;
+extern std::string axiom;
+extern std::vector<std::string> rules;
+extern std::string vars;
 
 #endif

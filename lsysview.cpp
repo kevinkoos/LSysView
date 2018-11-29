@@ -110,7 +110,7 @@ std::string vars = "AB";
 // float angle = 22.5;
 // std::string axiom = "A";
 // std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
-// std::string vars = "AFS";
+// std::string vars = "AFS";    // inialize lsys
 
 //self similar curve
 // float angle = 45;
@@ -140,7 +140,7 @@ int main( int argc, char *argv[ ] ) {
     InitGUI( );
     
     // inialize lsys
-    Lsys = new Lsystem(axiom, rules, vars);
+    Lsys = new Lsystem();
     
 	// create the display structures that will not change:
 	InitLists( );
