@@ -189,6 +189,10 @@ void InitGUI(void) {
     TwAddButton(bar, "RESET", &Reset, NULL, " key=R ");
     TwAddButton(bar, "EXIT", &Terminate, NULL, " key=q ");
     
+    
+    TwBar* stringbar = TwNewBar("L-System");
+    
+    TwAddButton(stringbar, "TEST", NULL, NULL, NULL);
 }
 
 

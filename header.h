@@ -3,7 +3,7 @@
 
 // base libraries 
 #include <stdlib.h>
-#include <ctype.h>
+#include <cctype>
 #include <iostream>
 #include <algorithm>
 
@@ -39,13 +39,11 @@ void    NextIteration();
 void    NextIterHandle(void*);
 void    CompleteDrawHandle(void*);
 void    AnimateDraw(void*);
-void    FreezeHandle(void*);
 void	Display( );
 float	ElapsedSeconds( );
 void	InitGraphics( );
 void	InitLists( );
 void	Reset(void*);
-void    Terminate(void*);
 void	Resize( int, int );
 void	Visibility( int );
 void	Axes( float );
@@ -53,7 +51,6 @@ void	HsvRgb( float[3], float [3] );
 void    InitGUI(void);
 void    MouseMotion( int x, int y );
 void    MouseButton( int button, int state, int x, int y );
-void    Keyboard( unsigned char c, int x, int y );
 void    ResetDrawing(void*);
 
 void SetQuaternionFromAxisAngle(const float *axis, float angle, float *quat);

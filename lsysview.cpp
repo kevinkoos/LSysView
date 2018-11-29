@@ -3,7 +3,7 @@
 
 /* LSysView - A viewing applicaiton for Lindenmayer systems
  * This application allows a user to view and interact with various 
- * L-systems of thier own making as well as those pre-defined.
+ * L-systems of their own making as well as those pre-defined.
  * Uses OpenGL, GLUT, and AntTweakBars
  * 
  * Author: Kevin Koos
@@ -21,11 +21,11 @@ const int INIT_WINDOW_WIDTH = { 1400 };
 const float MINSCALE = { 0.05f };
 
 // window background color (rgba):
-const GLfloat BACKCOLOR[ ] = { 0.5, 0.5, 0.5, 1. };
+const GLfloat BACKCOLOR[ ] = { 0.5f , 0.5f , 0.5f , 1.0f };
 
 // line width for the axes:
-const GLfloat AXES_WIDTH   = { 3. };
-const GLfloat AXES_LENGTH = { 3. };
+const GLfloat AXES_WIDTH   = { 3.0f };
+const GLfloat AXES_LENGTH = { 3.0f };
 
 // active mouse buttons (or them together):
 const int LEFT   = { 4 };
@@ -355,6 +355,12 @@ void Display( ) {
     // set the eye position, look-at position, and up-vector:
     gluLookAt( 0., 0., 1.0f,     0.0f, 0.0f, 0.0f,     1., 0., 0. );
 
+    // if the angle has changed, draw the complete scene
+    if (angle != p_angle) {
+        CompleteDrawHandle(NULL);
+        p_angle = angle;
+    }
+    
     // compute an iteration if specified
     if(bAnimate && bDraw && iCounter == 0) {
         for(int i = 0; i < iSkip; i++) {
@@ -376,12 +382,6 @@ void Display( ) {
         SetQuaternionFromAxisAngle(x_axis, g_Rotation_Angle, g_Rotation_Animation);
         ConvertQuaternionToMatrix(g_Rotation_Animation, mat);
         glMultMatrixf(mat);
-    }
-        
-    // if the angle has changed, draw the complete scene
-    if (angle != p_angle) {
-        CompleteDrawHandle(NULL);
-        p_angle = angle;
     }
     
     // rotate the scene and scale
