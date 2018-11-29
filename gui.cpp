@@ -5,8 +5,15 @@
 #include "header.h"
 
 int iCurrentGen;
+int iRules;
 TwBar* bar;
 TwBar* stringbar;
+
+//l-system vars
+float angle;
+std::string axiom;
+std::vector<std::string> rules(10);
+std::string vars;
 
 
 void LoadLsystem(void* data) {
@@ -17,12 +24,7 @@ void LoadLsystem(void* data) {
 
 // safelty close everything
 void Terminate(void* dt) {
-    glutSetWindow( MainWindow );
-    glDeleteLists(AxesList, 1);
-    glDeleteLists(SphereList, 1);
-    glFinish( );
-    glutDestroyWindow( MainWindow );
-    TwTerminate();
+    bExit = true;
 }
 
 // reset variables associated with the curve itself
@@ -59,12 +61,11 @@ void ResetCamera(void* data) {
     fPointScale = 1.0;
 }
 
-// reset the transformations and the colors:
-// this only sets the global variables --
-// the glut main loop is responsible for redrawing the scene
+// reset everything
 void Reset(void* data) {
-	AxesOn = false;
+	bAxes = false;
     bScale = false;
+    bExit = false;
 	bProjection = PERSP;
     bAnimate = true;
     bTranslate = true;
@@ -81,6 +82,15 @@ void Reset(void* data) {
     
     //reset lsys
     ResetDrawing(NULL);
+    
+    // TEMP reset lsystem vars
+    angle = 90;
+    axiom = "A";
+    vars = "AB";
+    rules[0] = "-BF+AFA+FB-";
+    rules[1] = "+AF-BFB-FA+";
+    iRules = 2;
+    LoadLsystem(NULL);
 }
 
 
@@ -131,6 +141,18 @@ void TW_CALL CopyStdStringToClient(std::string& destination, const std::string& 
     destination = source;
 }
 
+void NewRule(void* data) {
+    if (iRules < 10) {
+        std::string name = "Rule ";
+        iRules++;
+        name.append(std::to_string(iRules));
+        TwAddVarRW(stringbar, name.c_str(), TW_TYPE_STDSTRING, &(rules[iRules-1]), NULL);
+    } else {
+        std::cerr << "Too many rules." << std::endl;
+    }
+    
+}
+
 void InitGUI(void) {
     
     //initalize tweak bars
@@ -164,7 +186,7 @@ void InitGUI(void) {
         " label='Object rotation' opened=true help='Change the object orientation.' ");
     
     TwAddSeparator(bar, NULL, NULL);
-    TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &AxesOn, " key=a help='Turn the axes on or off.' ");
+    TwAddVarRW(bar, "Axes", TW_TYPE_BOOLCPP, &bAxes, " key=a help='Turn the axes on or off.' ");
     TwAddVarRW(bar, "Projection", TW_TYPE_BOOLCPP, &bProjection,
         " key=p help='Change between perspective and orthographic projection.' ");
     TwAddVarRW(bar, "Auto-Rotate", TW_TYPE_BOOLCPP, &bAutoRotate,
@@ -213,10 +235,11 @@ void InitGUI(void) {
     TwAddVarRW(stringbar, "Variables", TW_TYPE_STDSTRING, &vars, NULL);
     TwAddVarRW(stringbar, "Angle", TW_TYPE_FLOAT, &angle, 
         " min=0 max=360 step=0.1 precision=2 help='Increase or Decrease the working angle of the curve. Forces a complete draw of the curve.' ");
+    TwAddButton(stringbar, "Add Rule", &NewRule, NULL, NULL);
+    TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, NULL);
     TwAddVarRW(stringbar, "Rule 1", TW_TYPE_STDSTRING, &(rules[0]), NULL);
     TwAddVarRW(stringbar, "Rule 2", TW_TYPE_STDSTRING, &(rules[1]), NULL);
-    TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, NULL);
-
+    
 }
 
 

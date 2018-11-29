@@ -30,5 +30,5 @@ build:		$(MAIN) functions.cpp gui.cpp quat.cpp header.h turtle lsystem
 		g++ -o $(EXE) $(MAIN) $(objects) -lGL -lGLU ./libglut.so -lAntTweakBar
 
 # compile in whole using the cpp's to preserve information
-debug:		$(MAIN) functions.cpp gui.cpp quat.cpp header.h turtle lsystem
+debug:		$(MAIN) functions.cpp gui.cpp quat.cpp header.h turtle.hpp turtle.cpp lsystem.hpp lsystem.cpp
 		g++ -Og -ggdb -o $(EXE) $(MAIN) functions.cpp gui.cpp quat.cpp lsystem.cpp turtle.cpp -lGL -lGLU ./libglut.so -lAntTweakBar

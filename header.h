@@ -104,13 +104,13 @@ extern int      iFramePerCycle;
 extern int		ActiveButton;			// current button that is down
 extern int      iCounter;
 extern int		Xmouse, Ymouse;			// mouse values
-extern bool		AxesOn;					// != 0 means to draw the axes
+extern bool		bAxes;					// != 0 means to draw the axes
 extern bool		bProjection;		// ORTHO or PERSP
 extern bool     bAnimate;
 extern bool     bTranslate;
 extern bool     bScale;
 extern bool     bHue;
-
+extern bool     bExit;
 extern bool     bOneIter;
 extern bool     bCompIter;
 extern bool     bAutoRotate;

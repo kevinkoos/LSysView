@@ -44,9 +44,9 @@ int     iSkip;                  // # of line segments to draw each frame when bD
 int     iCounter;               // counter
 int		Xmouse, Ymouse;			// mouse values
 int		ActiveButton;			// current button that is down
-bool	AxesOn;					// true means to draw the axes
+bool	bAxes;					// true means to draw the axes
 bool    bAnimate;               // true mean to activate animation
-bool	bProjection;        // otho or perspective
+bool	bProjection;            // otho or perspective
 bool    bDraw;                  // true means draw animation
 bool    bTranslate;             // true is auto-translate on
 bool    bScale;                 // true means to scale the scene down once, set false after
@@ -54,6 +54,7 @@ bool    bHue;                   // true means to add a continuously changing hue
 bool    bOneIter;               // true means draw one turtle iteration
 bool    bCompIter;              // true means draw until the curve is complete
 bool    bAutoRotate;            // true means to rotate on the y axis
+bool    bExit;                  // true means to exit applicaiton
 
 // display lists
 GLuint AxesList;
@@ -89,10 +90,10 @@ std::vector<glm::vec3>   prev_vertices;
 // std::string vars = "X";
 
 //2d hilbert
-float angle = 90;
-std::string axiom = "A";
-std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
-std::string vars = "AB";
+// float angle = 90;
+// std::string axiom = "A";
+// std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
+// std::string vars = "AB";
 
 //fractal plant
 // float angle = 45;
@@ -135,10 +136,7 @@ int main( int argc, char *argv[ ] ) {
 
 	// setup all the graphics stuff:
 	InitGraphics( );
-
-    // setup gui and anttweaksbar
-    InitGUI( );
-    
+        
     // inialize lsys
     Lsys = new Lsystem();
     
@@ -146,9 +144,11 @@ int main( int argc, char *argv[ ] ) {
 	InitLists( );
 
 	// init all the global variables used by Display( ):
-	// this will also post a redisplay
 	Reset(NULL);
 
+    // setup gui and anttweaksbar
+    InitGUI( );
+    
 	// draw the scene once and wait for some interaction:
 	// (this will never return)
 	glutSetWindow( MainWindow );
@@ -311,8 +311,6 @@ void NextIteration() {
 
 // draw the complete scene:
 void Display( ) {
-
-    
 	// set which window we want to do the graphics into:
 	glutSetWindow( MainWindow );
 
@@ -390,7 +388,7 @@ void Display( ) {
     glScalef(Scale, Scale, Scale);
 
 	// possibly draw the axes:
-	if( AxesOn != 0 ) {
+	if( bAxes != 0 ) {
 		glColor3f( 1., 1., 1. );
 		glCallList( AxesList );
 	}
@@ -460,6 +458,15 @@ void Display( ) {
 	// be sure the graphics buffer has been sent:
 	// note: be sure to use glFlush( ) here, not glFinish( ) !
 	glFlush( );
+    
+    if (bExit) {
+        glutSetWindow( MainWindow );
+        glFinish( );
+        glDeleteLists(AxesList, 1);
+        glDeleteLists(SphereList, 1);
+        TwTerminate();
+        glutDestroyWindow( MainWindow );
+    }
 }
 
 // initialize the display lists that will not change:
