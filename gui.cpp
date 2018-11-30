@@ -15,11 +15,39 @@ std::string axiom;
 std::vector<std::string> rules(10);
 std::string vars;
 
+#define NUM_CURVES 4
+enum Curves{
+    HILBERT2D,
+    HILBERT3D,
+    PLANT2D,
+    SHRUB3D
+};
 
-void LoadLsystem(void* data) {
+Curves currentCurve;
+
+struct Curve {
+    float angle;
+    std::string axiom;
+    std::vector<std::string> rules;
+    std::string vars;
+};
+
+Curve c;
+std::vector<struct Curve> DefinedCurves;
+
+
+void SetLsystem(void* data) {
     delete Lsys;
     Lsys = new Lsystem(axiom, rules, vars);
     iCurrentGen = 0;
+}
+
+void LoadLsystem(void* data) {
+    angle = DefinedCurves[currentCurve].angle;
+    axiom = DefinedCurves[currentCurve].axiom;
+    vars = DefinedCurves[currentCurve].vars;
+    rules = DefinedCurves[currentCurve].rules;
+    SetLsystem(NULL);
 }
 
 // safelty close everything
@@ -75,7 +103,7 @@ void Reset(void* data) {
     Generation = Lsys->get_gen();
     iCurrentGen = 0;
     iSkip = 1;
-    LoadLsystem(NULL);    
+    SetLsystem(NULL);
     
     //reset camera stuff
     ResetCamera(NULL);
@@ -90,7 +118,10 @@ void Reset(void* data) {
     rules[0] = "-BF+AFA+FB-";
     rules[1] = "+AF-BFB-FA+";
     iRules = 2;
-    LoadLsystem(NULL);
+    SetLsystem(NULL);
+    
+    c.angle = 90; c.axiom = "A"; c.rules.push_back("-BF+AFA+FB-"); c.rules.push_back("+AF-BFB-FA+"); c.vars = "AB";
+    DefinedCurves.push_back(c);
 }
 
 
@@ -236,10 +267,19 @@ void InitGUI(void) {
     TwAddVarRW(stringbar, "Angle", TW_TYPE_FLOAT, &angle, 
         " min=0 max=360 step=0.1 precision=2 help='Increase or Decrease the working angle of the curve. Forces a complete draw of the curve.' ");
     TwAddButton(stringbar, "Add Rule", &NewRule, NULL, NULL);
-    TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, NULL);
+    TwAddButton(stringbar, "Set L-System", &SetLsystem, NULL, NULL);
+    {
+        TwEnumVal curveEV[NUM_CURVES] = { {HILBERT2D, "Hilbert Curve"}, {HILBERT3D, "3D Hilbert Curve"},
+        {PLANT2D, "2D Plant"}, {SHRUB3D, "3D Shrub"} };
+        TwType curveType = TwDefineEnum("CurveType", curveEV, NUM_CURVES);
+        TwAddVarRW(stringbar, "Curve", curveType, &currentCurve, NULL);
+        TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, NULL);
+    }
     TwAddVarRW(stringbar, "Rule 1", TW_TYPE_STDSTRING, &(rules[0]), NULL);
     TwAddVarRW(stringbar, "Rule 2", TW_TYPE_STDSTRING, &(rules[1]), NULL);
     
+
+    //LoadPresets();
 }
 
 

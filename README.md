@@ -13,3 +13,4 @@ $$$ make all nextiteration calls to happen in main display loop
 allow multi-branching to be toggled off, should save on system resources
 possibly add stochastic lsystems
 possibly possibly add parametric lsystems
+change buttons to callback vars

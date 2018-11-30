@@ -101,28 +101,11 @@ std::vector<glm::vec3>   prev_vertices;
 // std::vector<std::string> rules{"F+[>[X]-X]-F>[-FX]+X","F>F"};
 // std::string vars = "XF";
 
-//koch curve
-// float angle = 90;
-// std::string axiom = "F-F-F-F";
-// std::vector<std::string> rules{"FF-F-F-F-FF"};
-// std::string vars = "F";
-
 //shrub
 // float angle = 22.5;
 // std::string axiom = "A";
 // std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
-// std::string vars = "AFS";    // inialize lsys
-
-//self similar curve
-// float angle = 45;
-// std::string axiom = "F";
-// std::vector<std::string> rules{"F+D+F","D-F-D"};
-// std::string vars = "FD";
-
-// float angle = 60;
-// std::string axiom = "FFFFFA";
-// std::vector<std::string> rules{"[vF[vF]FFA]>>[vF[vF]FFA]>>[vF[vF]FFA]"};
-// std::string vars = "A";
+// std::string vars = "AFS";
 
 // has to go here
 float p_angle = angle;
