@@ -28,8 +28,9 @@
 
 #include "lsystem.hpp"
 #include "turtle.hpp"
-#include <cstdio>
 #include <list>
+#include <fstream>
+
 
 //#define GLUT_DISABLE_ATEXIT_HACK
 

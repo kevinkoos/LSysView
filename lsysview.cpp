@@ -9,7 +9,6 @@
  * Author: Kevin Koos
  */
 
-
 // title of these windows:
 const char *WINDOWTITLE = { "LSysView" };
 
@@ -38,7 +37,6 @@ float   fPointScale;            // scale of the turtles
 float	Scale;					// scaling factor
 int		MainWindow;				// window id for main graphics window
 int     Generation;             // current Generation number of l system
-int     iAniScale;              // how much to incrementally scale down/up by, default 0
 int     iFramePerCycle;         // # of frames between animated system updates
 int     iSkip;                  // # of line segments to draw each frame when bDraw true
 int     iCounter;               // counter
@@ -82,32 +80,6 @@ std::list<Turtle>        turt_sys;
 std::vector<glm::vec3>   current_turtles;
 std::vector<glm::vec3>   vertices;
 std::vector<glm::vec3>   prev_vertices;
-
-//3d hilbert
-// float angle = 90;
-// std::string axiom = "X";
-// std::vector<std::string> rules{"^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>"};
-// std::string vars = "X";
-
-//2d hilbert
-// float angle = 90;
-// std::string axiom = "A";
-// std::vector<std::string> rules{"-BF+AFA+FB-","+AF-BFB-FA+"};
-// std::string vars = "AB";
-
-//fractal plant
-// float angle = 45;
-// std::string axiom = "X";
-// std::vector<std::string> rules{"F+[>[X]-X]-F>[-FX]+X","F>F"};
-// std::string vars = "XF";
-
-//shrub
-// float angle = 22.5;
-// std::string axiom = "A";
-// std::vector<std::string> rules{"[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]","S>>>>>F","FL"};
-// std::string vars = "AFS";
-
-// has to go here
 float p_angle = angle;
 
 // main program:
@@ -126,11 +98,11 @@ int main( int argc, char *argv[ ] ) {
 	// create the display structures that will not change:
 	InitLists( );
 
-	// init all the global variables used by Display( ):
-	Reset(NULL);
-
     // setup gui and anttweaksbar
     InitGUI( );
+    
+	// init all the global variables used by Display( ):
+	Reset(NULL);
     
 	// draw the scene once and wait for some interaction:
 	// (this will never return)
@@ -143,16 +115,12 @@ int main( int argc, char *argv[ ] ) {
 
 // animates the scene, 
 void Animate( ) {
-    
+    // add one to the counter
     if(bAnimate && bDraw) { iCounter += 1; }
     iCounter %= iFramePerCycle;
-    
+    // stop drawing if we're done'
     if(turt_sys.empty()) {
         bDraw = false;
-    }
-    
-    if(iAniScale != 0) {
-        Scale += iAniScale;
     }
     
 	glutSetWindow( MainWindow );

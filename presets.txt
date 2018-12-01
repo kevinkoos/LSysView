@@ -1,0 +1,52 @@
+7
+
+2D Hilbert Curve
+90
+A
+AB
+-BF+AFA+FB-
++AF-BFB-FA+
+
+3D Hilbert Curve
+90
+X
+X
+^<XF^<XFX+F^>>XFXvF->>XFX+F>X+>
+
+Fractal Plant
+45
+X
+XF
+F+[>[X]-X]-F>[-FX]+X
+F>F
+
+3D Shrub
+22.5
+A
+AFS
+[vFL!A]>>>>>'[vFL!A]>>>>>>>'[vFL!A]
+S>>>>>F
+FL
+
+Koch Snowflake
+60
+F++F++F
+F
+F-F++F-F
+
+Dragon Curve
+90
+FX
+XY
+X+YF+
+-FX-Y
+
+Fir Tree
+20
+VZFFF
+VWXYZ
+[>+++W]>[>>>---W]YV
++X[>-W]Z
+-W[>+X]Z
+YZ
+[>>>-FFF][>>+FFF]F
