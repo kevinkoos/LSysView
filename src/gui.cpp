@@ -90,7 +90,7 @@ void InitGUI(void) {
     TwAddVarRW(bar, "Auto-Rotate", TW_TYPE_BOOLCPP, &bAutoRotate,
         " help='Applies a steady rotation about the y-axis on the object.' ");
     TwAddVarRW(bar, "Animation", TW_TYPE_BOOLCPP, &bAnimate, " key=f help='Toggle on or off the animation.' ");
-    TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &iFramePerCycle, NULL);
+    TwAddVarRW(bar, "Animation Speed", TW_TYPE_INT32, &iFramePerCycle, " min=1 max=100 step=1 ");
     TwAddVarRW(bar, "Animation Skip", TW_TYPE_INT32, &iSkip, 
         " min=1 max=10 step=1 help='Control the number of iterations to draw per draw when drawing the animation.' ");
     TwAddVarRW(bar, "Color Hue", TW_TYPE_BOOLCPP, &bHue,
@@ -130,6 +130,7 @@ void InitGUI(void) {
         TwType curveType = TwDefineEnum("CurveType", curveEV, numCurves);
         TwAddVarRW(stringbar, "Curve", curveType, &currentCurve, " keyIncr=UP keyDecr=DOWN ");
         TwAddButton(stringbar, "Load L-System", &LoadLsystem, NULL, " key=RETURN ");
+        TwAddSeparator(stringbar, NULL, NULL);
     }
     
     TwAddVarRW(stringbar, "Axiom", TW_TYPE_STDSTRING, &axiom, NULL);
