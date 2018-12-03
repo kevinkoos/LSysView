@@ -32,6 +32,7 @@ struct Curve {
 
 // Function Prototypes //
 void InitGUI(void);
+void LoadPresets();
 void SetLsystem(void* data);
 void NewRule(void* data);
 void LoadLsystem(void* data);

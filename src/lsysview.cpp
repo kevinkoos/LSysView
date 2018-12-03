@@ -200,6 +200,15 @@ void NextIteration() {
                 turtle++;                                //next turtle
                 t_string++;                              //next turtle string
                 break;
+                
+            case SDRAW:
+            case SFORWARD:
+                (*turtle).forward();
+                break;
+                
+            case REVERSE:
+                (*turtle).pitch(180);
+                break;
         
             case YAW_UP:
                 (*turtle).yaw(angle);
@@ -242,12 +251,7 @@ void NextIteration() {
                 }
                 systems.back().pop_back();          //remove last char ']'
                 break;
-                
-            case POLY:                              //draw a polygon to closing '}' turtle positions
-                
-                
-                break;
-                
+                                
             case END:                               //turtle is at end of string
                 turtle = turt_sys.erase(turtle);    //remove turtle
                 t_string = systems.erase(t_string); //remove its string

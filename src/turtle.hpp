@@ -10,13 +10,15 @@
 enum CHARS {
         DRAW =          'D',
         FORWARD =       'F',
+        SDRAW =         'd',
+        SFORWARD =      'f',
+        REVERSE =       '!',
         ROLL_UP =       '>',
         ROLL_DOWN =     '<',
         PITCH_UP =      '^',
         PITCH_DOWN =    'v',
         YAW_UP =        '+',
         YAW_DOWN =      '-',
-        POLY =          '{',
         BRANCH =        '[',
         END =           '\0',
 };

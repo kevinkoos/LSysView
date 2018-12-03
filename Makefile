@@ -1,34 +1,34 @@
 EXE = lsysview 
-MAIN = lsysview.cpp 
+MAIN = src/lsysview.cpp 
 
-objects = functions.o quat.o gui.o turtle.o lsystem.o 
+objects = src/functions.o src/quat.o src/gui.o src/turtle.o src/lsystem.o 
 
-$(EXE):		$(MAIN) header.h $(objects)
-		g++ -o $(EXE) $(MAIN) $(objects) -lGL -lGLU ./libglut.so -lAntTweakBar
+$(EXE):		$(MAIN) src/header.h $(objects)
+		g++ -o $(EXE) $(MAIN) $(objects) -lGL -lGLU -lglut -lAntTweakBar
 
-functions.o:	functions.cpp header.h
-		g++ functions.cpp -c
+src/functions.o:	src/functions.cpp src/header.h
+		g++ -c src/functions.cpp -o src/functions.o
 		
-quat.o:		quat.cpp header.h
-		g++ quat.cpp -c
+src/quat.o:		src/quat.cpp src/header.h
+		g++ -c src/quat.cpp -o src/quat.o
 		
-gui.o:		gui.cpp header.h
-		g++ gui.cpp -c
+src/gui.o:		src/gui.cpp src/header.h
+		g++ -c src/gui.cpp -o src/gui.o
 	
-turtle.o:	turtle.cpp turtle.hpp
-		g++ turtle.cpp -c
+src/turtle.o:	src/turtle.cpp src/turtle.hpp
+		g++ -c src/turtle.cpp -o src/turtle.o
 		
-lsystem.o:	lsystem.hpp lsystem.cpp
-		g++ lsystem.cpp -c
+src/lsystem.o:	src/lsystem.hpp src/lsystem.cpp
+		g++ -c src/lsystem.cpp -o src/lsystem.o
 
 # force these targets to always run when given the command
 .PHONY: 	clean build debug
 clean:
-		rm *.o $(EXE)
+		rm src/*.o $(EXE)
 
-build:		$(MAIN) functions.cpp gui.cpp quat.cpp header.h turtle lsystem
+build:		$(MAIN) src/header.h $(objects)
 		g++ -o $(EXE) $(MAIN) $(objects) -lGL -lGLU ./libglut.so -lAntTweakBar
 
 # compile in whole using the cpp's to preserve information
-debug:		$(MAIN) functions.cpp gui.cpp quat.cpp header.h turtle.hpp turtle.cpp lsystem.hpp lsystem.cpp
-		g++ -Og -ggdb -o $(EXE) $(MAIN) functions.cpp gui.cpp quat.cpp lsystem.cpp turtle.cpp -lGL -lGLU ./libglut.so -lAntTweakBar
+debug:
+		g++ -Og -ggdb -o $(EXE) $(MAIN) src/functions.cpp src/gui.cpp src/quat.cpp src/lsystem.cpp src/turtle.cpp -lGL -lGLU -lglut -lAntTweakBar
