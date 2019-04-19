@@ -5,13 +5,15 @@ This appliction allows a user to activly specifiy a L-system in the application 
 drawn on the screen. Systems can also be drawn in an animation which shown who the curve "grows". The
 turtles read only in a number of specified characters, all other characters are thrown away and assumed to\
 be used as placeholder variables by the L-system. Presets are loaded from a file named "presets.txt" with a 
-specified format. 
+specified format. Capable of 3D and branching systems. 
 
 GUI was made using the AntTweakBar library avaliable from: http://anttweakbar.sourceforge.net/doc/
 
 Application was built on linux and can be compiled by running the make file.
 
 Final project for CS 450 at OSU
+
+![Fir Tree preset](pic.png)
 
 ## Alphabet
  * F,D - draw forward one unit
